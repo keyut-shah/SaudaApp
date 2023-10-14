@@ -5,7 +5,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomeScreen from './Screens/Home/HomeScreen';
 import BottomTab from './Screens/BottomTab/BottomTab';
 import CreateScreen from './Screens/Create/CreateScreen';
-
+import UpdateDataScreen from './Screens/UpdateData/UpdateDataScreen';
 
 
 const Stack = createNativeStackNavigator();
@@ -32,6 +32,7 @@ const MainRouteConfig=()=>{
           />
           <Stack.Screen name="Second" component={SecondScreen} />
           <Stack.Screen name="CreateScreen" component={CreateScreen} />
+          <Stack.Screen name="UpdateDataScreen" component={UpdateDataScreen} />
         
 
         </Stack.Navigator>

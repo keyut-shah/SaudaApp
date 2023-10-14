@@ -55,9 +55,21 @@ export default HomeScreen = ({ navigation }) => {
   const [selectedBuyerData, setSelectedBuyerData] = useState(null);
 
 
-  const [text, onChangeText] = React.useState('Useless Text');
+  
 
-
+  function generateUniqueId() {
+    // Create a timestamp as a base for the ID (you can adjust the format)
+    const timestamp = new Date().getTime();
+  
+    // Create a random number (you can replace this with your own logic)
+    const randomNum = Math.floor(Math.random() * 1000);
+  
+    // Combine the timestamp and random number to create the ID
+    const uniqueId = `${timestamp}${randomNum}`;
+  
+    return uniqueId;
+  }
+  
   const addDataansShareData = () => {
     // validation check
     console.log("Seller name contians ", query);
@@ -75,20 +87,24 @@ export default HomeScreen = ({ navigation }) => {
       });
       return;
     }
+    const customID = generateUniqueId();
+    console.log('Generated custom ID:', customID);
+
     const usersCollection = firestore().collection('statement');
     const saudainfo = {
       sauda_no: Sauda,
       date: mySelectedDate,
-      BuyerName: query,
-      SellerName: buyerquery,
+      // BuyerName: query,
+      // SellerName: buyerquery,
       Rate: Rate,
       Bags: Bags,
       Weight: Weight,
-
-
+      unique_id:customID,
+      SellerData:selectedSellerData,
+      BuyerData:selectedBuyerData,
     }
     try {
-      usersCollection.add(saudainfo).then(docRef => {
+      usersCollection.doc(customID).set(saudainfo).then(docRef => {
 
         console.log("Data added doc ref conatins  ", docRef)
         Snackbar.show({
@@ -108,11 +124,13 @@ export default HomeScreen = ({ navigation }) => {
         onChangePayment('')
         setQuery('');
         setbuyerquery('');
-        // You can perform additional actions here after a successful addition, if needed.
+        setSelectedSellerData('');
+        setSelectedBuyerData('');
+      
       })
 
     } catch (error) {
-      setLoading(false);
+
 
 
       Snackbar.show({
@@ -280,12 +298,8 @@ export default HomeScreen = ({ navigation }) => {
                 onChangeText={handleInputChange}
                 renderItem={renderItem}
                 handleItemSelect={handleItemSelect}
-
                 inputContainerStyle={{ borderColor: Colors.primary, }}
-                
                 listStyle={{}}
-
-
                 flatListProps={{
                   keyboardShouldPersistTaps: 'always',
                   renderItem: renderItem
@@ -320,7 +334,8 @@ export default HomeScreen = ({ navigation }) => {
               <Autocomplete
                 hideResults={hidingbuyerdropdown}
                 ref={autocompletebuyerRef}
-                // renderTextInput={(props) => <CustomTextInput {...props} />}
+            
+                // renderTextInput={(props) =>( <CustomTextInput {...props} />)}
                 data={buyerfilterdata}
                 defaultValue={buyerquery}
                 onChangeText={handlebuyerchange}
