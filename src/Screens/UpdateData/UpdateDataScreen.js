@@ -11,19 +11,10 @@ import moment, { normalizeUnits } from 'moment';
 import firestore from '@react-native-firebase/firestore';
 import Snackbar from "react-native-snackbar";
 import Autocomplete from 'react-native-autocomplete-input';
-
+import DeleteConfirmationModal from '../../common/DeleteModal';
 export default UpdateScreen = ({ route, navigation }) => {
     const { statementdata } = route.params;
     const [saudadetail, setsaudadetail] = useState(statementdata);
-    const [ScreenEditable, setScreenEditable] = useState(false);
-    useEffect(() => {
-        console.log("statement data route ",statementdata);
-        setScreenEditable(false);
-    }, [])
-
-useEffect(()=>{
-console.log("Screen editable staus ",ScreenEditable);
-},[ScreenEditable])
     const [Rate, onChangeRate] = useState('');
     const [Weight, onChangeWeight] = useState('');
     const [Sauda, onChangeSauda] = useState('');
@@ -33,20 +24,6 @@ console.log("Screen editable staus ",ScreenEditable);
     const [mySelectedDate, setSelectedDate] = useState(moment(new Date()).format('DD/MM/YYYY'));
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
 
-
-    const showDatePicker = () => {
-        setDatePickerVisibility(true);
-    };
-    const hideDatePicker = () => {
-        setDatePickerVisibility(false);
-    };
-
-    const handleConfirm = (date) => {
-        console.log("A date has been picked: ", date);
-        const formattedDate = moment(date).format('DD/MM/YYYY');
-        setSelectedDate(formattedDate);
-        hideDatePicker();
-    };
 
     const autocompletebuyerRef = useRef(null);
     const autocompletesellerRef = useRef(null);
@@ -62,6 +39,34 @@ console.log("Screen editable staus ",ScreenEditable);
 
     const [selectedSellerData, setSelectedSellerData] = useState(null);
     const [selectedBuyerData, setSelectedBuyerData] = useState(null);
+
+
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [ScreenEditable, setScreenEditable] = useState(false);
+
+
+    useEffect(() => {
+        console.log("statement data route ", statementdata);
+        setScreenEditable(false);
+        
+
+    }, [])
+
+ 
+
+    const showDatePicker = () => {
+        setDatePickerVisibility(true);
+    };
+    const hideDatePicker = () => {
+        setDatePickerVisibility(false);
+    };
+
+    const handleConfirm = (date) => {
+        console.log("A date has been picked: ", date);
+        const formattedDate = moment(date).format('DD/MM/YYYY');
+        setSelectedDate(formattedDate);
+        hideDatePicker();
+    };
 
 
 
@@ -251,6 +256,51 @@ console.log("Screen editable staus ",ScreenEditable);
         );
     }
 
+
+
+    const handleModalDelete = () => {
+        // Perform the delete logic here
+        console.log("handle delete method call")
+        const uniqueid = statementdata.unique_id;
+        console.log("unique id contains ", uniqueid);
+        const docRef = firestore().collection('statement').doc(uniqueid);
+        docRef
+            .delete()
+            .then(() => {
+                console.log("is user deleted")
+
+            })
+            .catch((error) => {
+                //   console.error('Error deleting document: ', error);
+                Snackbar.show({
+                    text: 'Something Went Wrong Please Try Again',
+                    duration: Snackbar.LENGTH_SHORT,
+                    backgroundColor: 'red',
+                    textColor: 'white',
+                });
+                return;
+            });
+        setIsModalVisible(false);
+        navigation.goBack();
+    };
+    function handleEdit() {
+        console.log("handle edit event method is call so now we can edit the screen");
+      
+        
+        onChangeRate(statementdata?.Rate);
+        onChangeWeight(statementdata?.Weight);
+        onChangeSauda(statementdata?.sauda_no);
+        onChangeBags(statementdata?.Bags)
+        onChangePayment(statementdata?.Payment)
+        onChangeNotes(statementdata?.Notes)
+        setQuery(statementdata?.SellerData?.companyname);
+        
+        setbuyerquery(statementdata?.BuyerData?.companyname);
+        setSelectedBuyerData('');
+        setSelectedSellerData('');
+        setScreenEditable(true);
+    }
+
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: Colors.statusbar }}>
             <LinearGradient colors={['#f1f7fc', '#e8f2ff', '#cedff5']} style={{ flex: 1, }}>
@@ -258,42 +308,42 @@ console.log("Screen editable staus ",ScreenEditable);
                 <View style={{ justifyContent: 'center', alignItems: 'center' }}>
                     <Text style={styles.sty2}>Sanmati/Navkar Brokers </Text>
                 </View>
-                <View style={[styles.sty3, { paddingVertical: moderateScale(10), flexDirection: 'row', alignItems: 'center' ,justifyContent:"space-between"}]}>
+                <View style={[styles.sty3, { paddingVertical: moderateScale(10), flexDirection: 'row', alignItems: 'center', justifyContent: "space-between" }]}>
 
-<View style={{flexDirection:'row'}}>
-                    <Text style={[styles.sty5, {}]}>Sauda No:</Text>
-                    {  ScreenEditable &&  <Text style={styles.sty7}>*</Text> }
-                    {
-                        ScreenEditable ?
-                            (
-                                <TextInput
-                                    style={[styles.sty15, { marginLeft: moderateScale(10), width: moderateScale(60) }]}
-                                    onChangeText={onChangeSauda}
-                                    value={Sauda}
-                                    keyboardType='numeric'
-                                />
-                            ) :
-                            (<Text style={{color: 'black', fontSize: moderateScale(15), marginLeft: moderateScale(10)}}>{statementdata.sauda_no}</Text>)
-                    }
+                    <View style={{ flexDirection: 'row' }}>
+                        <Text style={[styles.sty5, {}]}>Sauda No:</Text>
+                        {ScreenEditable && <Text style={styles.sty7}>*</Text>}
+                        {
+                            ScreenEditable ?
+                                (
+                                    <TextInput
+                                        style={[styles.sty15, { marginLeft: moderateScale(10), width: moderateScale(60) }]}
+                                        onChangeText={onChangeSauda}
+                                        value={Sauda}
+                                        keyboardType='numeric'
+                                    />
+                                ) :
+                                (<Text style={{ color: 'black', fontSize: moderateScale(15), marginLeft: moderateScale(10) }}>{statementdata.sauda_no}</Text>)
+                        }
                     </View>
-                    <View style={{flexDirection:'row',marginRight:moderateScale(20)}}>
- {
-                  
-                    <TouchableOpacity onPress={showDatePicker} style={{ marginLeft: moderateScale(20) }}>
-                        <Image
-                            style={{ width: moderateScale(25), height: moderateScale(25) }}
-                            source={require('../../assets/calendar.png')}
+                    <View style={{ flexDirection: 'row', marginRight: moderateScale(20) }}>
+                        {
+
+                            <TouchableOpacity onPress={showDatePicker} style={{ marginLeft: moderateScale(20) }}>
+                                <Image
+                                    style={{ width: moderateScale(25), height: moderateScale(25) }}
+                                    source={require('../../assets/calendar.png')}
+                                />
+                            </TouchableOpacity>
+
+                        }
+                        <DateTimePickerModal
+                            isVisible={isDatePickerVisible}
+                            mode="date"
+                            onConfirm={handleConfirm}
+                            onCancel={hideDatePicker}
                         />
-                    </TouchableOpacity>
-                            
-}
-                    <DateTimePickerModal
-                        isVisible={isDatePickerVisible}
-                        mode="date"
-                        onConfirm={handleConfirm}
-                        onCancel={hideDatePicker}
-                    />
-                    <Text style={{ color: 'black', fontSize: moderateScale(15), marginLeft: moderateScale(10) }}>{mySelectedDate}</Text>
+                        <Text style={{ color: 'black', fontSize: moderateScale(15), marginLeft: moderateScale(10) }}>{mySelectedDate}</Text>
                     </View>
                 </View>
                 <ScrollView
@@ -302,9 +352,14 @@ console.log("Screen editable staus ",ScreenEditable);
                     {/* Seller container  */}
                     <View style={styles.sty3}>
                         {/* Seller heading  */}
-                        <View style={styles.sty6}>
-                            <Text style={styles.sty5}>Seller Name </Text>
-                            {  ScreenEditable &&               <Text style={styles.sty7}>*</Text> }
+                        <View style={[styles.sty6, { marginBottom: moderateScale(10) }]}>
+                            <Text style={styles.sty5}>Seller Name :</Text>
+                            {ScreenEditable && <Text style={styles.sty7}>*</Text>}
+                            {ScreenEditable == false &&
+                                <View style={{ flexDirection: "row", alignItems: 'center' }}>
+                                    <Text style={{ color: 'black', fontSize: moderateScale(15), marginLeft: moderateScale(5) }}>{statementdata?.SellerData?.companyname}</Text>
+                                </View>
+                            }
                         </View>
                         {/* Seler textinput  */}
                         {
@@ -336,10 +391,11 @@ console.log("Screen editable staus ",ScreenEditable);
                                     </TouchableOpacity>
                                 </View>
                             ) :
-                                (<View style={styles.sty9}>
-                              <Text style={{color: 'black', fontSize: moderateScale(15), marginLeft: moderateScale(10)}}>{statementdata?.SellerData?.companyname}</Text>
-                                </View>
-                                )
+                                (null)
+                            // (<View style={styles.sty9}>
+                            //     <Text style={{ color: 'black', fontSize: moderateScale(15), marginLeft: moderateScale(10) }}>{statementdata?.SellerData?.companyname}</Text>
+                            // </View>
+                            // )
                         }
                         <View style={styles.sty6}>
                             <Text style={styles.sty5}>City :</Text>
@@ -348,7 +404,7 @@ console.log("Screen editable staus ",ScreenEditable);
                                     <Text style={styles.sty17}>{selectedSellerData?.city}</Text>
                                 ) :
                                     (
-                                        <Text style={{color: 'black', fontSize: moderateScale(15), marginLeft: moderateScale(10)}}>{statementdata.SellerData?.city}</Text>
+                                        <Text style={{ color: 'black', fontSize: moderateScale(15), marginLeft: moderateScale(10) }}>{statementdata.SellerData?.city}</Text>
                                     )
                             }
                         </View>
@@ -358,9 +414,9 @@ console.log("Screen editable staus ",ScreenEditable);
                                 ScreenEditable ? (
                                     <Text style={styles.sty17}>{selectedSellerData?.mobile}</Text>
                                 ) :
-                                (
-                                <Text style={styles.sty17}>{statementdata?.SellerData?.mobile}</Text>
-                                )
+                                    (
+                                        <Text style={styles.sty17}>{statementdata?.SellerData?.mobile}</Text>
+                                    )
                             }
                         </View>
                     </View>
@@ -368,9 +424,14 @@ console.log("Screen editable staus ",ScreenEditable);
                     {/* Buyer container  */}
                     <View style={styles.sty3}>
                         {/* buyer heading  */}
-                        <View style={styles.sty6}>
-                            <Text style={styles.sty5}>Buyer Name </Text>
-                            {  ScreenEditable &&          <Text style={styles.sty7}>*</Text> }
+                        <View style={[styles.sty6, { marginBottom: moderateScale(10) }]}>
+                            <Text style={styles.sty5}>Buyer Name :</Text>
+                            {ScreenEditable && <Text style={styles.sty7}>*</Text>}
+                            {ScreenEditable == false &&
+                                <View style={{ flexDirection: "row", alignItems: 'center' }}>
+                                    <Text style={{ color: 'black', fontSize: moderateScale(15), marginLeft: moderateScale(5) }}>{statementdata?.BuyerData?.companyname}</Text>
+                                </View>
+                            }
                         </View>
                         {/* buyer textinput  */}
                         {
@@ -400,22 +461,38 @@ console.log("Screen editable staus ",ScreenEditable);
 
                                 </View>
                             ) :
-                                (<View style={styles.sty9}>
-                                <Text style={{color: 'black', fontSize: moderateScale(15), marginLeft: moderateScale(10)}}>{statementdata?.BuyerData?.companyname}</Text>
-                                </View>
-                                )
+                                (null)
+                            // (<View style={styles.sty9}>
+                            //     <Text style={{ color: 'black', fontSize: moderateScale(15), marginLeft: moderateScale(10) }}>{statementdata?.BuyerData?.companyname}</Text>
+                            // </View>
+                            // )
                         }
                         <View style={styles.sty6}>
                             <Text style={styles.sty5}>City :</Text>
-                            <Text style={styles.sty17}>{selectedBuyerData?.city}</Text>
+                            {
+                                ScreenEditable ? (
+                                    <Text style={styles.sty17}>{selectedBuyerData?.city}</Text>
+                                ) :
+                                    (
+                                        <Text style={styles.sty17}>{statementdata?.BuyerData?.city}</Text>
+                                    )
+                            }
                         </View>
 
 
                         <View style={[styles.sty6, { marginTop: moderateScale(10) }]}>
                             <Text style={[styles.sty5, {}]}>Mo No :</Text>
-                            <Text style={styles.sty17}>{selectedBuyerData?.mobile}</Text>
+                            {
+                                ScreenEditable ? (
+                                    <Text style={styles.sty17}>{selectedBuyerData?.mobile}</Text>
+                                ) :
+                                    (
+                                        <Text style={styles.sty17}>{statementdata?.BuyerData?.mobile}</Text>
+                                    )
+                            }
+
                         </View>
-                        {/* <Text style={[styles.sty5, { marginTop: moderateScale(10) }]}>Mo No :</Text> */}
+
 
 
                     </View>
@@ -425,7 +502,7 @@ console.log("Screen editable staus ",ScreenEditable);
                         {/* Rate */}
                         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                             <Text style={styles.sty5}>Rate </Text>
-                            {  ScreenEditable &&    <Text style={styles.sty7}>*</Text> }
+                            {ScreenEditable && <Text style={styles.sty7}>*</Text>}
                             <Text style={[styles.sty5, { marginLeft: 3 }]}>:</Text>
                             {
                                 ScreenEditable ? (
@@ -436,13 +513,15 @@ console.log("Screen editable staus ",ScreenEditable);
 
                                     />
                                 ) :
-                                    (<Text></Text>)
+                                    (
+                                        <Text style={styles.sty17}>{statementdata?.Rate}</Text>
+                                    )
                             }
                         </View>
                         {/*  weight*/}
                         <View style={styles.sty12}>
                             <Text style={styles.sty5}>Weight </Text>
-                            {  ScreenEditable &&   <Text style={styles.sty7}>*</Text>}
+                            {ScreenEditable && <Text style={styles.sty7}>*</Text>}
                             <Text style={[styles.sty5, { marginLeft: 3 }]}>:</Text>
                             {
                                 ScreenEditable ? (
@@ -453,12 +532,15 @@ console.log("Screen editable staus ",ScreenEditable);
 
                                     />
                                 ) :
-                                    (<Text></Text>)
+                                    (
+                                        <Text ellipsizeMode='tail'
+                                            style={styles.sty17}>{statementdata?.Weight}</Text>
+                                    )
                             }
                         </View>
                         <View style={styles.sty12}>
                             <Text style={styles.sty5}>Bags </Text>
-                          {  ScreenEditable && <Text style={styles.sty7}>*</Text> }
+                            {ScreenEditable && <Text style={styles.sty7}>*</Text>}
                             <Text style={[styles.sty5, { marginLeft: 3 }]}>:</Text>
                             {
                                 ScreenEditable ? (
@@ -469,7 +551,11 @@ console.log("Screen editable staus ",ScreenEditable);
 
                                     />
                                 ) :
-                                    (<Text></Text>)
+                                    (
+                                        <Text
+                                            ellipsizeMode='tail'
+                                            style={styles.sty17}>{statementdata?.Bags}</Text>
+                                    )
                             }
                         </View>
                         <View style={styles.sty12}>
@@ -478,40 +564,87 @@ console.log("Screen editable staus ",ScreenEditable);
                             <Text style={[styles.sty5, { marginLeft: 1 }]}>:</Text>
                             {
                                 ScreenEditable ? (
-                            <TextInput
-                                style={[styles.sty15, { marginLeft: moderateScale(0), flex: 1 }]}
-                                onChangeText={onChangePayment}
-                                value={Payment}
+                                    <TextInput
+                                        style={[styles.sty15, { marginLeft: moderateScale(0), flex: 1 }]}
+                                        onChangeText={onChangePayment}
+                                        value={Payment}
 
-                            />
-                                ):
-                                (<Text></Text>)
-}
+                                    />
+                                ) :
+                                    <Text ellipsizeMode='tail'
+                                        style={styles.sty17}>{statementdata?.Payment}</Text>
+                            }
                         </View>
-                        <View style={styles.sty12}>
+                        <View style={[styles.sty12,]}>
                             <Text style={styles.sty5}>Note </Text>
 
                             <Text style={[styles.sty5, { marginLeft: 1 }]}>:</Text>
-
+                            {
+                                ScreenEditable == false &&
+                                <View style={{}}>
+                                    <Text
+                                        ellipsizeMode='tail'
+                                        style={styles.sty17}>{statementdata?.Notes}</Text>
+                                </View>
+                            }
                         </View>
-                        <View style={{ marginTop: moderateScale(10) }}>
-                            <TextInput
-                                style={styles.sty16}
-                                onChangeText={onChangeNotes}
-                                value={Notes}
+                        {
+                            ScreenEditable ? (
+                                <View style={{ marginTop: moderateScale(10) }}>
+                                    <TextInput
+                                        style={styles.sty16}
+                                        onChangeText={onChangeNotes}
+                                        value={Notes}
 
-                            />
-                        </View>
+                                    />
+                                </View>
+                            ) :
+
+                                (null)
+                            // <View style={{ marginTop: moderateScale(10) , }}>
+                            // <Text style={styles.sty17}>{statementdata?.Notes}</Text>
+                            // </View>
+
+                        }
 
                     </View>
-                    <View style={styles.bottomview}>
-                        <TouchableOpacity style={styles.SaveContainer}
-                            onPress={addDataansShareData}
-                        >
-                            <Text style={styles.SaveText}>Save</Text>
+                    {
+                        ScreenEditable ?
+                            (
+                                <View style={styles.bottomview}>
+                                    <TouchableOpacity style={styles.SaveContainer}
+                                        onPress={addDataansShareData}
+                                    >
+                                        <Text style={styles.SaveText}>Update</Text>
 
-                        </TouchableOpacity>
-                    </View>
+                                    </TouchableOpacity>
+                                </View>
+
+                            ) :
+                            (
+                                <View style={styles.bottomview}>
+                                    <TouchableOpacity style={styles.SaveContainer}
+                                        // onPress={() => handleDelete()}
+                                        onPress={() => setIsModalVisible(true)}
+                                    >
+                                        <Text style={styles.SaveText}>Delete</Text>
+
+                                    </TouchableOpacity>
+                                    <TouchableOpacity style={styles.SaveContainer}
+                                        onPress={() => handleEdit()}
+                                    >
+                                        <Text style={styles.SaveText}>Edit</Text>
+
+                                    </TouchableOpacity>
+                                    <DeleteConfirmationModal
+                                        isVisible={isModalVisible}
+                                        onClose={() => setIsModalVisible(false)}
+                                        onDelete={handleModalDelete}
+                                    />
+                                </View>
+                            )
+                    }
+
                 </ScrollView>
 
             </LinearGradient>

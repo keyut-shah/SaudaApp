@@ -134,8 +134,9 @@ const styles = StyleSheet.create({
         color: 'white',
     },
     bottomview: {
+        
         flexDirection: 'row', flex: 1,
-        justifyContent: 'center',
+        justifyContent:  'space-around',
         marginVertical: moderateScale(10),
 
 

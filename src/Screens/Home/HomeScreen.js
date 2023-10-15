@@ -94,18 +94,17 @@ export default HomeScreen = ({ navigation }) => {
     const saudainfo = {
       sauda_no: Sauda,
       date: mySelectedDate,
-      // BuyerName: query,
-      // SellerName: buyerquery,
       Rate: Rate,
       Bags: Bags,
       Weight: Weight,
       unique_id:customID,
       SellerData:selectedSellerData,
       BuyerData:selectedBuyerData,
+      Notes:Notes,
+      Payment:Payment,
     }
     try {
       usersCollection.doc(customID).set(saudainfo).then(docRef => {
-
         console.log("Data added doc ref conatins  ", docRef)
         Snackbar.show({
           text: 'Data Added Successfully ',
@@ -126,7 +125,8 @@ export default HomeScreen = ({ navigation }) => {
         setbuyerquery('');
         setSelectedSellerData('');
         setSelectedBuyerData('');
-      
+        onChangeNotes('');
+        onChangePayment('');
       })
 
     } catch (error) {
@@ -395,6 +395,7 @@ export default HomeScreen = ({ navigation }) => {
 
               />
             </View>
+            {/* Bags */}
             <View style={styles.sty12}>
               <Text style={styles.sty5}>Bags </Text>
               <Text style={styles.sty7}>*</Text>
@@ -406,6 +407,7 @@ export default HomeScreen = ({ navigation }) => {
 
               />
             </View>
+            {/* Payment */}
             <View style={styles.sty12}>
               <Text style={styles.sty5}>Payment</Text>
 
@@ -417,6 +419,8 @@ export default HomeScreen = ({ navigation }) => {
 
               />
             </View>
+
+            {/* Note */}
             <View style={styles.sty12}>
               <Text style={styles.sty5}>Note </Text>
 

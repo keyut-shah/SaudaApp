@@ -40,13 +40,13 @@ const DataRow = ({ data }) => {
                 <Text 
                 numberOfLines={1}
                 ellipsizeMode='tail'
-                style={[styles.headertext, ]}>{data.SellerName}</Text>
+                style={[styles.headertext, ]}>{data?.SellerData?.companyname}</Text>
             </View>
             <View style={styles.seller_container}>
                 <Text 
                   numberOfLines={1}
                   ellipsizeMode='tail'
-                style={[styles.headertext, ]}>{data.BuyerName}</Text>
+                style={[styles.headertext, ]}>{data?.BuyerData?.companyname}</Text>
             </View>
             <View style={styles.rate_container}>
                 <Text
