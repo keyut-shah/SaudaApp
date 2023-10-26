@@ -60,6 +60,12 @@ const DataRow = ({ data }) => {
                  ellipsizeMode='tail'
                 style={styles.headertext}>{data.Bags}</Text>
             </View>
+            <View style={styles.bardan_container}>
+                <Text 
+                 
+        ellipsizeMode= 'tail'
+                style={styles.headertext}>{data?.Bardan}</Text>
+            </View>
         </TouchableOpacity>
     );
 }
@@ -80,7 +86,7 @@ export default StatementScreen = ({navigation}) => {
     // }, [])
     useEffect(() => {
         const handleStatement = () => {
-          const usersCollection = firestore().collection('statement').orderBy('sauda_no');
+          const usersCollection = firestore().collection('statement').orderBy('unique_id');
       
           // Set up a listener for real-time updates
           const unsubscribe = usersCollection.onSnapshot((querySnapshot) => {
@@ -123,6 +129,9 @@ export default StatementScreen = ({navigation}) => {
                         </View>
                         <View style={styles.bags_container}>
                             <Text style={styles.headertext}>Bags</Text>
+                        </View>
+                        <View style={styles.bardan_container}>
+                            <Text style={styles.headertext}>Bardan</Text>
                         </View>
                     </View>
                     <FlatList

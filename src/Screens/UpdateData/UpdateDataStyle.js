@@ -126,7 +126,7 @@ const styles = StyleSheet.create({
         // paddingHorizontal:moderateScale(100),
         borderRadius: moderateScale(10),
         backgroundColor: Colors.primary,
-        width: moderateScale(80),
+        width: moderateScale(100),
         justifyContent: 'center',
         alignItems: 'center'
     },
@@ -146,7 +146,32 @@ const styles = StyleSheet.create({
         color: 'black',
         fontSize:moderateScale(14),
         fontWeight:'400'
-    }
+    },
+    dropdown: {
+        margin: 16,
+        height: 50,
+        borderBottomColor: 'gray',
+        borderBottomWidth: 0.5,
+        borderWidth:1,
+        width:170,
+      },
+      icon: {
+        marginRight: 5,
+      },
+      placeholderStyle: {
+        fontSize: 16,
+      },
+      selectedTextStyle: {
+        fontSize: 16,
+      },
+      iconStyle: {
+        width: 20,
+        height: 20,
+      },
+      inputSearchStyle: {
+        height: 40,
+        fontSize: 16,
+      },
 
 })
 

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import {ScrollView, SafeAreaView, Text, View, TouchableOpacity, TextInput, Modal, Button, Image ,LogBox} from 'react-native';
+import { ScrollView, SafeAreaView, Text, View, TouchableOpacity, TextInput, Modal, Button, Image, LogBox } from 'react-native';
 import Colors from '../../common/Colors';
 import styles from './HomeStyle';
 import LinearGradient from 'react-native-linear-gradient';
@@ -11,6 +11,11 @@ import moment, { normalizeUnits } from 'moment';
 import firestore from '@react-native-firebase/firestore';
 import Snackbar from "react-native-snackbar";
 import Autocomplete from 'react-native-autocomplete-input';
+import CustomDropdown from '../../common/BardanDropDown';
+
+import DropdownComponent from '../../common/BardanDropDown';
+
+
 
 export default HomeScreen = ({ navigation }) => {
   const [SellerName, onChangeSellerName] = useState('');
@@ -24,7 +29,7 @@ export default HomeScreen = ({ navigation }) => {
   const [mySelectedDate, setSelectedDate] = useState(moment(new Date()).format('DD/MM/YYYY'));
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
 
- 
+
   const showDatePicker = () => {
     setDatePickerVisibility(true);
   };
@@ -55,21 +60,28 @@ export default HomeScreen = ({ navigation }) => {
   const [selectedBuyerData, setSelectedBuyerData] = useState(null);
 
 
-  
+
+  // bardan state
+  const [selectedBardan, setSelectedBardan] = useState('Sabardan');
+
+useEffect(()=>{
+
+},[selectedBardan])
 
   function generateUniqueId() {
     // Create a timestamp as a base for the ID (you can adjust the format)
     const timestamp = new Date().getTime();
-  
+
     // Create a random number (you can replace this with your own logic)
     const randomNum = Math.floor(Math.random() * 1000);
-  
+
     // Combine the timestamp and random number to create the ID
     const uniqueId = `${timestamp}${randomNum}`;
-  
+
     return uniqueId;
   }
-  
+
+  // Add Data to the Server
   const addDataansShareData = () => {
     // validation check
     console.log("Seller name contians ", query);
@@ -78,6 +90,8 @@ export default HomeScreen = ({ navigation }) => {
     console.log("Rate val ", Rate);
     console.log("Bags contains ", Bags);
     console.log("Weight contains ", Weight);
+    console.log("Keyut here does it go here or else where ")
+    
     if (query.trim() === '' || Sauda.trim() == '' || buyerquery.trim() == '' || Rate.trim() == '' || Bags.trim() == '' || Weight.trim() == '') {
       Snackbar.show({
         text: 'Please write Empty Data ',
@@ -97,15 +111,16 @@ export default HomeScreen = ({ navigation }) => {
       Rate: Rate,
       Bags: Bags,
       Weight: Weight,
-      unique_id:customID,
-      SellerData:selectedSellerData,
-      BuyerData:selectedBuyerData,
-      Notes:Notes,
-      Payment:Payment,
+      unique_id: customID,
+      SellerData: selectedSellerData,
+      BuyerData: selectedBuyerData,
+      Notes: Notes,
+      Payment: Payment,
+      Bardan:selectedBardan,
     }
     try {
       usersCollection.doc(customID).set(saudainfo).then(docRef => {
-        console.log("Data added doc ref conatins  ", docRef)
+        console.log("Data added doc ref conatins  DOCREF==>  ", docRef)
         Snackbar.show({
           text: 'Data Added Successfully ',
           duration: Snackbar.LENGTH_SHORT,
@@ -127,32 +142,61 @@ export default HomeScreen = ({ navigation }) => {
         setSelectedBuyerData('');
         onChangeNotes('');
         onChangePayment('');
+        setSelectedBardan('Sabardan');
       })
 
     } catch (error) {
 
 
 
+      console.error('Error adding data to Firestore: ', error);
       Snackbar.show({
         text: 'Something Went Wrong Please try again',
         duration: Snackbar.LENGTH_SHORT,
         backgroundColor: 'red',
         textColor: 'white',
       });
-      console.error('Error adding data to Firestore: ', error);
     }
   }
-  useEffect(() => {
-    fetchData();
-  }, []);
+  // useEffect(() => {
+  //   fetchData();
+  // }, []);
+
+  // // Fetch data from the firestore 
+  // const fetchData = async () => {
+  //   const usersCollection = firestore().collection('users');
+  //   const snapshot = await usersCollection.get();
+  //   const users = snapshot.docs.map((doc) => doc.data());
+  //   console.log("My user data contains ", users);
+
+  //   setData(users);
+  // };
+
   const fetchData = async () => {
+    console.log("does fetch user method call")
     const usersCollection = firestore().collection('users');
     const snapshot = await usersCollection.get();
     const users = snapshot.docs.map((doc) => doc.data());
     console.log("My user data contains ", users);
-
     setData(users);
   };
+
+  useEffect(() => {
+    // Fetch data when the component mounts
+    fetchData();
+
+    // Set up a Firestore listener for real-time updates
+    const usersCollection = firestore().collection('users');
+    const unsubscribe = usersCollection.onSnapshot((querySnapshot) => {
+      const updatedData = querySnapshot.docs.map((doc) => doc.data());
+      setData(updatedData);
+    });
+
+    // Clean up the listener when the component unmounts
+    return () => unsubscribe();
+  }, []);
+
+  // handle input change done 
   const handleInputChange = (text) => {
     sethidingsellerdropdown(false);
     // console.log("text contians in textinput is --> ", text);
@@ -313,11 +357,11 @@ export default HomeScreen = ({ navigation }) => {
             </View>
             <View style={styles.sty6}>
               <Text style={styles.sty5}>City :</Text>
-              <Text style={styles.sty17}>{selectedSellerData?.city }</Text>
+              <Text style={styles.sty17}>{selectedSellerData?.city}</Text>
             </View>
-            <View style={[styles.sty6,{marginTop: moderateScale(10)}]}>
-            <Text style={[styles.sty5, {  }]}>Mo No :</Text>
-            <Text style={styles.sty17}>{selectedSellerData?.mobile }</Text>
+            <View style={[styles.sty6, { marginTop: moderateScale(10) }]}>
+              <Text style={[styles.sty5, {}]}>Mo No :</Text>
+              <Text style={styles.sty17}>{selectedSellerData?.mobile}</Text>
             </View>
           </View>
 
@@ -334,7 +378,7 @@ export default HomeScreen = ({ navigation }) => {
               <Autocomplete
                 hideResults={hidingbuyerdropdown}
                 ref={autocompletebuyerRef}
-            
+
                 // renderTextInput={(props) =>( <CustomTextInput {...props} />)}
                 data={buyerfilterdata}
                 defaultValue={buyerquery}
@@ -356,13 +400,13 @@ export default HomeScreen = ({ navigation }) => {
 
             <View style={styles.sty6}>
               <Text style={styles.sty5}>City :</Text>
-              <Text style={styles.sty17}>{selectedBuyerData?.city }</Text>
+              <Text style={styles.sty17}>{selectedBuyerData?.city}</Text>
             </View>
 
 
-            <View style={[styles.sty6,{marginTop: moderateScale(10)}]}>
-            <Text style={[styles.sty5, {  }]}>Mo No :</Text>
-            <Text style={styles.sty17}>{selectedBuyerData?.mobile }</Text>
+            <View style={[styles.sty6, { marginTop: moderateScale(10) }]}>
+              <Text style={[styles.sty5, {}]}>Mo No :</Text>
+              <Text style={styles.sty17}>{selectedBuyerData?.mobile}</Text>
             </View>
             {/* <Text style={[styles.sty5, { marginTop: moderateScale(10) }]}>Mo No :</Text> */}
 
@@ -407,6 +451,18 @@ export default HomeScreen = ({ navigation }) => {
 
               />
             </View>
+            {/* Bardan Type */}
+            <View style={styles.sty12}>
+            <Text style={styles.sty5}>Bardan </Text>
+              <Text style={styles.sty7}>*</Text>
+              <DropdownComponent
+
+                value={selectedBardan}
+                onChange={item=>{
+                  setSelectedBardan(item?.label)
+                }}
+              />
+            </View>
             {/* Payment */}
             <View style={styles.sty12}>
               <Text style={styles.sty5}>Payment</Text>
@@ -435,7 +491,7 @@ export default HomeScreen = ({ navigation }) => {
 
               />
             </View>
-           
+
           </View>
           <View style={styles.bottomview}>
             <TouchableOpacity style={styles.SaveContainer}
@@ -446,7 +502,7 @@ export default HomeScreen = ({ navigation }) => {
             </TouchableOpacity>
           </View>
         </ScrollView>
-      
+
       </LinearGradient>
     </SafeAreaView>
   );
