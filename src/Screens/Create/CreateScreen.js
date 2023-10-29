@@ -1,5 +1,5 @@
-import React, { useState } from "react"
-import { View, Text, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
+import React, { useState, useEffect, useRef } from "react"
+import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, Image } from 'react-native';
 import LinearGradient from "react-native-linear-gradient";
 import styles from "./CreateStyle";
 import { moderateScale } from "react-native-size-matters";
@@ -10,10 +10,11 @@ import Snackbar from "react-native-snackbar";
 import Colors from "../../common/Colors";
 import Loader, { showLoader, hideLoader } from "../../common/Loader";
 import { Modal } from "react-native-paper";
+import Autocomplete from 'react-native-autocomplete-input';
 
 
 function CreateScreen({ navigation }) {
-    const [SellerName, onChangeSellerName] = useState('');
+    const [TraaderName, onChangeTraderName] = useState('');
     const [PartyName, onChangePartyName] = useState('');
     const [city, onChangeCity] = useState('');
     const [address, onChangeAddress] = useState('');
@@ -22,6 +23,90 @@ function CreateScreen({ navigation }) {
 
 
     const [loading, setLoading] = useState(false);
+
+    const [data, setData] = useState([]);
+
+    const autocompletetraderRef = useRef(null);
+    const [filteredData, setFilteredData] = useState([]);
+    const [query, setQuery] = useState('');
+
+    const [hidingtraderdropdown, sethidingtraderdropdown] = useState(false);
+
+
+    const [ScreenEditable, setScreenEditable] = useState(false);
+
+    const fetchData = async () => {
+        console.log("does fetch user method call")
+        const usersCollection = firestore().collection('users');
+        const snapshot = await usersCollection.get();
+        const users = snapshot.docs.map((doc) => doc.data());
+        console.log("My user data contains ", users);
+        setData(users);
+    };
+
+    useEffect(() => {
+        // Fetch data when the component mounts
+        fetchData();
+
+        // Set up a Firestore listener for real-time updates
+        const usersCollection = firestore().collection('users');
+        const unsubscribe = usersCollection.onSnapshot((querySnapshot) => {
+            const updatedData = querySnapshot.docs.map((doc) => doc.data());
+            setData(updatedData);
+        });
+
+        // Clean up the listener when the component unmounts
+        return () => unsubscribe();
+    }, []);
+
+    const handleInputChange = (text) => {
+        console.log("What happens while input change ", text);
+        sethidingtraderdropdown(false);
+        // console.log("text contians in textinput is --> ", text);
+        setQuery(text);
+
+        // Filter the data based on the query
+        const filtered = data
+            .filter((item) => item.companyname.toLowerCase().includes(text.toLowerCase()))
+            .map((item) => item.companyname);
+
+        console.log("My filtered contains ", filtered);
+        setFilteredData(filtered);
+    };
+    const handleItemSelect = (selectedValue) => {
+        console.log("On select the item from the dropdown ", selectedValue);
+        const selectedTrader = data.find((item) => item.companyname === selectedValue);
+        console.log("Selected Tradder object contains ", selectedTrader)
+        // setSelectedSellerData(selectedSeller);
+        onChangePartyName(selectedTrader?.companyname);
+        onChangeAddress(selectedTrader?.address);
+        onChangeCity(selectedTrader?.city)
+        onChangeTraderName(selectedTrader?.name);
+        onChangeMoNo(selectedTrader?.mobile);
+        onChangeGSTNo(selectedTrader?.gst);
+        setScreenEditable(true);
+        setQuery(selectedValue);
+        sethidingtraderdropdown(true);
+        if (sethidingtraderdropdown.current) {
+            sethidingtraderdropdown.current.blur();
+        }
+    };
+    const renderItem = ({ item }) => {
+        // console.log("My render item contains ", item);
+        return (
+            <TouchableOpacity
+                style={{ borderWidth: 1 }}
+                onPress={() => handleItemSelect(item)}>
+                <View style={{ backgroundColor: 'white', justifyContent: 'center', alignItems: 'center' }}>
+                    <Text
+                        ellipsizeMode='tail'
+                        style={{ color: 'black', marginVertical: 10 }}>{item}</Text>
+                </View>
+            </TouchableOpacity>
+        )
+    }
+    //fetch user data 
+
 
 
     const addDataToFirestore = async () => {
@@ -39,7 +124,7 @@ function CreateScreen({ navigation }) {
 
         const sellerdata = {
             companyname: PartyName,
-            name: SellerName,
+            name: TraaderName,
             address: address,
             city: city,
             gst: gst_no,
@@ -55,7 +140,7 @@ function CreateScreen({ navigation }) {
                     backgroundColor: 'green',
                     textColor: 'white',
                 });
-                onChangeSellerName('');
+                onChangeTraderName('');
                 onChangePartyName('');
                 onChangeCity('');
                 onChangeAddress('');
@@ -77,7 +162,13 @@ function CreateScreen({ navigation }) {
             console.error('Error adding data to Firestore: ', error);
         }
     };
+const updateDataToFirestore=async()=>{
+    console.log("Here trying to update data of my Trader");
 
+}
+const deleteDataToFireStore=async()=>{
+    console.log("Here trying to delete data of the firestore ");
+}
     return (
 
 
@@ -108,7 +199,41 @@ function CreateScreen({ navigation }) {
                     (
                         <>
                             <View style={styles.sty3}>
+                                <View style={{
+                                    marginVertical: moderateScale(10), flexDirection: 'row',
+                                    paddingHorizontal: moderateScale(5),
+                                    borderColor: Colors.primary, borderWidth: 2
+                                }}>
+                                    <Image
+                                        style={{ width: moderateScale(23), height: moderateScale(23), marginTop: moderateScale(5) }}
+                                        source={require('../../assets/search_symbol.png')}
+                                    />
+                                    <Autocomplete
+                                        clearButtonMode="always"
+                                        style={{ color: 'black', }}
+                                        ref={autocompletetraderRef}
 
+
+                                        data={filteredData}
+                                        defaultValue={query}
+                                        onChangeText={handleInputChange}
+                                        renderItem={renderItem}
+                                        handleItemSelect={handleItemSelect}
+                                        inputContainerStyle={{ borderWidth: 0, marginLeft: moderateScale(5) }}
+                                        listContainerStyle={{ maxHeight: moderateScale(120) }}
+                                        onBlur={() => sethidingtraderdropdown(true)} // Hide on outside click
+                                        onFocus={() => sethidingtraderdropdown(false)} // Show when focused
+                                        hideResults={hidingtraderdropdown}
+                                        // hideResults={hideResultProduct}
+
+                                        flatListProps={{
+
+                                            keyboardShouldPersistTaps: 'always',
+                                            renderItem: renderItem
+                                        }}
+
+                                    />
+                                </View>
                                 <View style={styles.sty6}>
                                     <Text style={styles.sty5}>Company Name </Text>
                                     <Text style={styles.sty7}>*</Text>
@@ -146,8 +271,8 @@ function CreateScreen({ navigation }) {
                                 <View style={styles.sty9}>
                                     <TextInput
                                         style={styles.sty8}
-                                        onChangeText={onChangeSellerName}
-                                        value={SellerName}
+                                        onChangeText={onChangeTraderName}
+                                        value={TraaderName}
 
                                     />
 
@@ -200,20 +325,39 @@ function CreateScreen({ navigation }) {
                             </View>
 
                             <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginHorizontal: moderateScale(10) }}>
-                                <TouchableOpacity style={styles.sty18} onPress={() => navigation.goBack()}>
-                                    <Text style={styles.sty17}>Back</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity style={styles.sty18}
-                                    onPress={addDataToFirestore}
-                                >
-                                    <Text style={styles.sty17}>Save</Text>
-                                </TouchableOpacity>
+                                {
+                                    ScreenEditable ?
+                                        (
+                                            <>
+                                            <TouchableOpacity style={styles.sty18} onPress={deleteDataToFireStore}>
+                                                <Text style={styles.sty17}>Delete</Text>
+                                            </TouchableOpacity>
+                                            <TouchableOpacity style={styles.sty18}
+                                                onPress={updateDataToFirestore}
+                                            >
+                                                <Text style={styles.sty17}>Update</Text>
+                                            </TouchableOpacity>
+                                            </>
+                                        ) :
+                                        (
+                                            <>
+                                                <TouchableOpacity style={styles.sty18} onPress={() => navigation.goBack()}>
+                                                    <Text style={styles.sty17}>Back</Text>
+                                                </TouchableOpacity>
+                                                <TouchableOpacity style={styles.sty18}
+                                                    onPress={addDataToFirestore}
+                                                >
+                                                    <Text style={styles.sty17}>Save</Text>
+                                                </TouchableOpacity>
+                                                </>
+                                        )
+                                }
                             </View>
                         </>
                     )
 
             }
-        </LinearGradient>
+        </LinearGradient >
 
     )
 }

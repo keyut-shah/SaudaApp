@@ -62,7 +62,8 @@ const styles = StyleSheet.create({
     sty9: {
         marginVertical: moderateScale(10),
         flexDirection: 'row',
-        alignItems: 'center'
+        alignItems: 'center',
+        // height:moderateScale(100)
     },
     sty10: {
         color: 'black',

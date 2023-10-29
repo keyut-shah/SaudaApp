@@ -183,7 +183,7 @@ useEffect(()=>{
 
   useEffect(() => {
     // Fetch data when the component mounts
-    fetchData();
+    // fetchData();
 
     // Set up a Firestore listener for real-time updates
     const usersCollection = firestore().collection('users');
@@ -237,7 +237,7 @@ useEffect(()=>{
     // console.log("My render item contains ", item);
     return (
       <TouchableOpacity
-        style={{ borderWidth: 1 }}
+        style={{ borderWidth:1,borderColor:'grey' }}
         onPress={() => handleItemSelect(item)}>
         <View style={{ backgroundColor: 'white', justifyContent: 'center', alignItems: 'center' }}>
           <Text
@@ -321,6 +321,7 @@ useEffect(()=>{
         </View>
         <ScrollView
           keyboardShouldPersistTaps="handled"
+          nestedScrollEnabled={true}
           style={styles.sty4}>
           {/* Seller container  */}
           <View style={styles.sty3}>
@@ -333,7 +334,7 @@ useEffect(()=>{
             <View style={styles.sty9}>
 
               <Autocomplete
-
+              style={{color:'black'}}
                 ref={autocompletesellerRef}
                 // renderTextInput={(props) => <CustomTextInput {...props} />}
                 hideResults={hidingsellerdropdown}
@@ -343,11 +344,16 @@ useEffect(()=>{
                 renderItem={renderItem}
                 handleItemSelect={handleItemSelect}
                 inputContainerStyle={{ borderColor: Colors.primary, }}
-                listStyle={{}}
+                 listContainerStyle={{maxHeight:moderateScale(120)}}
                 flatListProps={{
+                  
                   keyboardShouldPersistTaps: 'always',
                   renderItem: renderItem
                 }}
+                onBlur={() => sethidingsellerdropdown(true)} // Hide on outside click
+                onFocus={() => sethidingsellerdropdown(false)} // Show when focused
+               
+
               />
               <TouchableOpacity style={styles.sty10}
                 onPress={() => navigation.navigate('CreateScreen')}
@@ -376,6 +382,7 @@ useEffect(()=>{
             <View style={styles.sty9}>
 
               <Autocomplete
+              style={{color:'black'}}
                 hideResults={hidingbuyerdropdown}
                 ref={autocompletebuyerRef}
 
@@ -389,6 +396,10 @@ useEffect(()=>{
                   keyboardShouldPersistTaps: 'always',
                   renderItem: renderbuyeritem
                 }}
+                listContainerStyle={{maxHeight:moderateScale(120)}}
+                onBlur={() => sethidingbuyerdropdown(true)} // Hide on outside click
+                onFocus={() => sethidingbuyerdropdown(false)} // Show when focused
+                
               />
               <TouchableOpacity style={styles.sty10}
                 onPress={() => navigation.navigate('CreateScreen')}
