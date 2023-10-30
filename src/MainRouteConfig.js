@@ -6,8 +6,8 @@ import HomeScreen from './Screens/Home/HomeScreen';
 import BottomTab from './Screens/BottomTab/BottomTab';
 import CreateScreen from './Screens/Create/CreateScreen';
 import UpdateDataScreen from './Screens/UpdateData/UpdateDataScreen';
-
-
+import NewBardanScreen from './Screens/Bardan/NewBardanScreen';
+import ItemTypeScreen from './Screens/ItemType/ItemTypeScreen';
 const Stack = createNativeStackNavigator();
 
 
@@ -27,12 +27,12 @@ const MainRouteConfig=()=>{
             initialRouteName={BottomTab}
         >
 
-          <Stack.Screen name="HomeTab" component={BottomTab}
-          
-          />
+          <Stack.Screen name="HomeTab" component={BottomTab}/>
           <Stack.Screen name="Second" component={SecondScreen} />
           <Stack.Screen name="CreateScreen" component={CreateScreen} />
           <Stack.Screen name="UpdateDataScreen" component={UpdateDataScreen} />
+          <Stack.Screen name="NewBardanScreen" component={NewBardanScreen} />
+          <Stack.Screen name="ItemTypeScreen" component={ItemTypeScreen} />
         
 
         </Stack.Navigator>

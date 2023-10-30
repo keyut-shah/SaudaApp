@@ -23,36 +23,34 @@ import { StyleSheet, Text, View } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
 import firestore from '@react-native-firebase/firestore';
 
-const DropdownComponent = ({ value, onChange }) => {
 
-  console.log("My value contains -->", value);
+const ItemDropdownComponent = ({ value, onChange }) => {
+  // console.log("My value contains -->", value);
   // console.log("On change props contains ", onChange);
   // console.log("Why dropdown update This quickly ");
   const [selectedValue, setSelectedValue] = useState(value);
-  const [bardandata, setbardandata] = useState([]);
-  console.log("Selected value contaons ",selectedValue)
+  const [itemdata, setitemdata] = useState([]);
   useEffect(() => {
-    console.log("bardan data in useeffect contains ", bardandata);
-  }, [bardandata])
+    console.log("bardan data in useeffect contains ", itemdata);
+  }, [itemdata])
   const fetchdata = async () => {
-    const bardancollection = await firestore().collection('extra').doc('4RIEUMiNldcGJ26goLnw');
+    const bardancollection = await firestore().collection('extra').doc('9A0AG6Ag4oAPQV2YLx3u');
     bardancollection.onSnapshot((docSnapshot) => {
       if (docSnapshot.exists) {
         const data = docSnapshot.data();
         console.log("object contains ", data);
 
 
-        if (data && data.bardantype) {
+        if (data && data.itemtype) {
 
-          const arrayData = data.bardantype;
+          const arrayData = data.itemtype;
           console.log("Array data contains ", arrayData);
           const transformedArray = arrayData.map(value => ({
             label: value,
             value,
           }));
-          // console.log("transformed array contians--> ",typeof(transformedArray)==typeof(arrayData))
-          // setbardandata(transformedArray); 
-          setbardandata(transformedArray);
+        
+          setitemdata(transformedArray);
           // Now you can access the values within the array
 
         }
@@ -72,17 +70,16 @@ const DropdownComponent = ({ value, onChange }) => {
   }, [])
 
   return (
-  
-
+   
     <Dropdown
       style={styles.dropdown}
       placeholderStyle={styles.placeholderStyle}
       selectedTextStyle={styles.selectedTextStyle}
-      data={bardandata}
+      data={itemdata}
       maxHeight={300}
       labelField="label"
       valueField="value"
-      placeholder="Select Bardan"
+      placeholder="Select Item"
       value={selectedValue}
       onChange={value => {
         setSelectedValue(value);
@@ -93,20 +90,12 @@ const DropdownComponent = ({ value, onChange }) => {
       itemStyle={{ color: 'black' }}
       listStyle={{ backgroundColor: 'green', color: 'black' }}
       itemTextStyle={{ color: 'black' }}
-    // renderItem={(item) => {
-    //   <>
-    //     <View style={{ height: 100 }}>
-    //       <Text style={{ color: 'black' }}>{item}</Text>
-    //     </View>
-    //   </>
 
-
-    // }}
     />
   );
 };
 
-export default DropdownComponent;
+export default ItemDropdownComponent;
 
 const styles = StyleSheet.create({
   dropdown: {

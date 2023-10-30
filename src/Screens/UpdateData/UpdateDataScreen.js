@@ -14,7 +14,7 @@ import Autocomplete from 'react-native-autocomplete-input';
 import DropdownComponent from '../../common/BardanDropDown';
 import DeleteConfirmationModal from '../../common/DeleteModal';
 import { Dropdown } from 'react-native-element-dropdown';
-
+import ItemDropdownComponent from '../../common/ItemDropDown';
 export default UpdateScreen = ({ route, navigation }) => {
     const { statementdata } = route.params;
     const [saudadetail, setsaudadetail] = useState(statementdata);
@@ -66,6 +66,8 @@ export default UpdateScreen = ({ route, navigation }) => {
             const [customid,setcustomid]=useState(statementdata?.unique_id);
     // Bardan 
     const [selectedBardan, setSelectedBardan] = useState(null);
+    const [selectItemType,setSelectItemType]=useState(null);
+
 
     useEffect(() => {
         console.log("Selected Bardan", selectedBardan);
@@ -74,15 +76,22 @@ export default UpdateScreen = ({ route, navigation }) => {
     useEffect(() => {
         // Check the label value and set the corresponding value
         if (statementdata) { // Assuming `data` is where your labels are coming from
-          if (statementdata?.Bardan === 'Sabaardan') {
-            setSelectedBardan({ label: 'Sabaardan', value: '1' });
-          } else if (statementdata?.Bardan === 'BOPP') {
-            setSelectedBardan({ label: 'BOPP', value: '2' });
-          } else if (statementdata?.Bardan === 'JUTE') {
-            setSelectedBardan({ label: 'JUTE', value: '3' });
-          } else if (statementdata?.Bardan === 'LOOSE') {
-            setSelectedBardan({ label: 'LOOSE', value: '4' });
+            console.log("useeffect of statement data --> bardan type",statementdata?.Bardan);
+          if (statementdata?.Bardan === 'Sabardan') {
+                console.log("does my bardan goes in sabardan")
+                setSelectedBardan('Sabardan');
+            // setSelectedBardan({ label: 'Sabardan', value: '1' });
+          } else if (statementdata?.Bardan === 'Bopp') {
+            // setSelectedBardan({ label: 'Bopp', value: '2' });
+            setSelectedBardan('Bopp');
+          } else if (statementdata?.Bardan === 'jute') {
+            // setSelectedBardan({ label: 'Jute', value: '3' });
+            setSelectedBardan('Jute');
+          } else if (statementdata?.Bardan === 'Loose') {
+            // setSelectedBardan({ label: 'loose', value: '4' });
+            setSelectedBardan('Loose');
           } else {
+            console.log("useeffect of statementdata does it go in else part ")
             // Default value if the label doesn't match any of the above
             setSelectedBardan({ label: 'Select Bardan', value: null });
           }
@@ -258,7 +267,7 @@ export default UpdateScreen = ({ route, navigation }) => {
         const usersCollection = firestore().collection('users');
         const snapshot = await usersCollection.get();
         const users = snapshot.docs.map((doc) => doc.data());
-        console.log("My user data contains ", users);
+        console.log("My user data contains in Update Screen", users);
 
         setData(users);
     };
@@ -403,6 +412,11 @@ export default UpdateScreen = ({ route, navigation }) => {
         setScreenEditable(true);
     }
 
+    useEffect(()=>{
+console.log("sauda detail for this particular data is ",saudadetail)
+    },[saudadetail])
+
+
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: Colors.statusbar }}>
             <LinearGradient colors={['#f1f7fc', '#e8f2ff', '#cedff5']} style={{ flex: 1, }}>
@@ -470,6 +484,7 @@ export default UpdateScreen = ({ route, navigation }) => {
 
 
                                     <Autocomplete
+                                  style={{color:'black'}}
 
                                         ref={autocompletesellerRef}
                                         // renderTextInput={(props) => <CustomTextInput {...props} />}
@@ -541,8 +556,10 @@ export default UpdateScreen = ({ route, navigation }) => {
                                 <View style={styles.sty9}>
 
                                     <Autocomplete
+                                    
                                         hideResults={hidingbuyerdropdown}
                                         ref={autocompletebuyerRef}
+                                        style={{color:'black'}}
 
                                         // renderTextInput={(props) =>( <CustomTextInput {...props} />)}
                                         data={buyerfilterdata}
@@ -660,6 +677,7 @@ export default UpdateScreen = ({ route, navigation }) => {
                                     )
                             }
                         </View>
+                        {/* Bardan */}
                         <View style={styles.sty12}>
                             <Text style={styles.sty5}>Bardan Type </Text>
                             {ScreenEditable && <Text style={styles.sty7}>*</Text>}
@@ -702,6 +720,37 @@ export default UpdateScreen = ({ route, navigation }) => {
                                     )
                             }
                         </View>
+
+                            {/* Item */}
+                            <View style={styles.sty12}>
+                            <Text style={styles.sty5}>Item Type </Text>
+                            {ScreenEditable && <Text style={styles.sty7}>*</Text>}
+                            <Text style={[styles.sty5, { marginLeft: 3 }]}>:</Text>
+                            {
+                                ScreenEditable ? (
+                                    // <TextInput
+                                    //     style={[styles.sty15, { marginLeft: moderateScale(15), justifyContent: 'center', alignItems: 'center' }]}
+                                    //     onChangeText={onChangeBags}
+                                    //     value={Bags}
+
+                                    // />
+                                    <ItemDropdownComponent
+
+                                    value={selectItemType}
+                                    onChange={item=>{
+                                      setSelectItemType(item?.label)
+                                    }}
+                                  />      
+                                
+                                ) :
+                                    (
+                                        <Text
+                                            ellipsizeMode='tail'
+                                            style={styles.sty17}>{statementdata?.Item}</Text>
+                                    )
+                            }
+                        </View>
+                        {/* Payment */}
                         <View style={styles.sty12}>
                             <Text style={styles.sty5}>Payment</Text>
 

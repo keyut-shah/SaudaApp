@@ -14,6 +14,7 @@ import Autocomplete from 'react-native-autocomplete-input';
 import CustomDropdown from '../../common/BardanDropDown';
 
 import DropdownComponent from '../../common/BardanDropDown';
+import ItemDropdownComponent from '../../common/ItemDropDown';
 
 
 
@@ -62,8 +63,9 @@ export default HomeScreen = ({ navigation }) => {
 
 
   // bardan state
-  const [selectedBardan, setSelectedBardan] = useState('Sabardan');
-
+  const [selectedBardan, setSelectedBardan] = useState('');
+  const [selectItem,setSelectItem]=useState('');
+  
 useEffect(()=>{
 
 },[selectedBardan])
@@ -117,6 +119,7 @@ useEffect(()=>{
       Notes: Notes,
       Payment: Payment,
       Bardan:selectedBardan,
+      Item:selectItem,
     }
     try {
       usersCollection.doc(customID).set(saudainfo).then(docRef => {
@@ -142,7 +145,9 @@ useEffect(()=>{
         setSelectedBuyerData('');
         onChangeNotes('');
         onChangePayment('');
-        setSelectedBardan('Sabardan');
+        setSelectedBardan('');
+        setSelectItem('');
+
       })
 
     } catch (error) {
@@ -471,6 +476,19 @@ useEffect(()=>{
                 value={selectedBardan}
                 onChange={item=>{
                   setSelectedBardan(item?.label)
+                }}
+              />
+            </View>
+            {/* Item Type */}
+            <View style={styles.sty12}>
+            <Text style={styles.sty5}>ItemType </Text>
+              <Text style={styles.sty7}>*</Text>
+              <ItemDropdownComponent
+
+                value={selectItem}
+                onChange={item=>{
+                  console.log("item contains ",item);
+                  setSelectItem(item?.label)
                 }}
               />
             </View>

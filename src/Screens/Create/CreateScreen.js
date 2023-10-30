@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react"
-import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, Image } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, Image, ScrollView } from 'react-native';
 import LinearGradient from "react-native-linear-gradient";
 import styles from "./CreateStyle";
 import { moderateScale } from "react-native-size-matters";
@@ -11,6 +11,7 @@ import Colors from "../../common/Colors";
 import Loader, { showLoader, hideLoader } from "../../common/Loader";
 import { Modal } from "react-native-paper";
 import Autocomplete from 'react-native-autocomplete-input';
+import DeleteConfirmationModal from '../../common/DeleteModal';
 
 
 function CreateScreen({ navigation }) {
@@ -34,7 +35,12 @@ function CreateScreen({ navigation }) {
 
 
     const [ScreenEditable, setScreenEditable] = useState(false);
+    const [selectedtradervalue, setselectedtradervalue] = useState('');
 
+    // DeleteModal
+    const [isModalVisible, setIsModalVisible] = useState(false);
+
+    const [uniqueid, setuniqueid] = useState('');
     const fetchData = async () => {
         console.log("does fetch user method call")
         const usersCollection = firestore().collection('users');
@@ -59,6 +65,18 @@ function CreateScreen({ navigation }) {
         return () => unsubscribe();
     }, []);
 
+    function generateUniqueId() {
+        // Create a timestamp as a base for the ID (you can adjust the format)
+        const timestamp = new Date().getTime();
+
+        // Create a random number (you can replace this with your own logic)
+        const randomNum = Math.floor(Math.random() * 1000);
+
+        // Combine the timestamp and random number to create the ID
+        const uniqueId = `${timestamp}${randomNum}`;
+
+        return uniqueId;
+    }
     const handleInputChange = (text) => {
         console.log("What happens while input change ", text);
         sethidingtraderdropdown(false);
@@ -77,16 +95,19 @@ function CreateScreen({ navigation }) {
         console.log("On select the item from the dropdown ", selectedValue);
         const selectedTrader = data.find((item) => item.companyname === selectedValue);
         console.log("Selected Tradder object contains ", selectedTrader)
-        // setSelectedSellerData(selectedSeller);
+
+        setselectedtradervalue(selectedTrader)
         onChangePartyName(selectedTrader?.companyname);
         onChangeAddress(selectedTrader?.address);
         onChangeCity(selectedTrader?.city)
         onChangeTraderName(selectedTrader?.name);
         onChangeMoNo(selectedTrader?.mobile);
         onChangeGSTNo(selectedTrader?.gst);
+        setuniqueid(selectedTrader?.customid);
         setScreenEditable(true);
         setQuery(selectedValue);
         sethidingtraderdropdown(true);
+
         if (sethidingtraderdropdown.current) {
             sethidingtraderdropdown.current.blur();
         }
@@ -111,7 +132,8 @@ function CreateScreen({ navigation }) {
 
     const addDataToFirestore = async () => {
         // setLoading(true);
-        const usersCollection = firestore().collection('users');
+        const customID = generateUniqueId();
+        const usersCollection = firestore().collection('users').doc(customID);
         if (PartyName.trim() === '') {
             Snackbar.show({
                 text: 'Please write Company Name',
@@ -129,9 +151,10 @@ function CreateScreen({ navigation }) {
             city: city,
             gst: gst_no,
             mobile: mobile_no,
+            customid: customID,
         };
         try {
-            usersCollection.add(sellerdata).then(docRef => {
+            usersCollection.set(sellerdata).then(docRef => {
                 setLoading(false);
                 console.log("Data added doc ref conatins  ", docRef)
                 Snackbar.show({
@@ -140,12 +163,7 @@ function CreateScreen({ navigation }) {
                     backgroundColor: 'green',
                     textColor: 'white',
                 });
-                onChangeTraderName('');
-                onChangePartyName('');
-                onChangeCity('');
-                onChangeAddress('');
-                onChangeMoNo('');
-                onChangeAddress('')
+                clearstatedata();
                 // You can perform additional actions here after a successful addition, if needed.
             })
 
@@ -162,13 +180,130 @@ function CreateScreen({ navigation }) {
             console.error('Error adding data to Firestore: ', error);
         }
     };
-const updateDataToFirestore=async()=>{
-    console.log("Here trying to update data of my Trader");
 
-}
-const deleteDataToFireStore=async()=>{
-    console.log("Here trying to delete data of the firestore ");
-}
+    const updateDataToFirestore = async () => {
+        console.log("Here trying to update data of my Trader");
+        let updatetraderdata = {
+            address: address,
+            city: city,
+            companyname: PartyName,
+            gst: gst_no,
+            mobile: mobile_no,
+            name: TraaderName,
+            customid: uniqueid,
+        }
+        // Also trying to update in statement data but how can i update thats the challenfe 
+        // maybe find my solution where seller.uniqueid== current maybe work letts try it 
+        firestore()
+            .collection('users')
+            .doc(uniqueid)
+            .update(updatetraderdata)
+
+
+        const statementCollection = firestore().collection('statement');
+        const statementref = statementCollection.where('SellerData.customid', '==', uniqueid)
+            .get()
+            .then((querySnapshot) => {
+                querySnapshot.forEach((doc) => {
+                    const statementRef = statementCollection.doc(doc.id);
+                    // Update the nested 'user1' field within 'sellerdata'
+                    statementRef.update({ 'SellerData': updatetraderdata });
+                });
+                console.log("user data update successfully");
+
+            })
+            .catch((error) => {
+                console.log("Error while updating user details");
+                Snackbar.show({
+                    text: 'Error While Updating data .Please Try Again',
+                    duration: Snackbar.LENGTH_SHORT,
+                    backgroundColor: 'red',
+                    textColor: 'white',
+                });
+                return;
+            })
+
+        statementCollection.where('BuyerData.customid', '==', uniqueid)
+            .get()
+            .then((querySnapshot) => {
+                querySnapshot.forEach((doc) => {
+                    const statementRef = statementCollection.doc(doc.id);
+                    // Update the nested 'user1' field within 'sellerdata'
+                    statementRef.update({ 'SellerData': updatetraderdata });
+                });
+                console.log("user data update successfully");
+
+            })
+            .catch((error) => {
+                console.log("Error while updating user details");
+                Snackbar.show({
+                    text: 'Error While Updating data .Please Try Again',
+                    duration: Snackbar.LENGTH_SHORT,
+                    backgroundColor: 'red',
+                    textColor: 'white',
+                });
+                return;
+            })
+        Snackbar.show({
+            text: 'User Update successfully',
+            duration: Snackbar.LENGTH_SHORT,
+            backgroundColor: 'green',
+            textColor: 'white',
+        });
+        clearstatedata();
+    }
+    const deleteDataToFireStore = async () => {
+        console.log("Here trying to delete data of the firestore ");
+
+        firestore()
+            .collection('users')
+            // .where('companyname', '==', selectedtradervalue?.companyname)
+            .doc(uniqueid)
+            .get()
+            .then((querySnapshot) => {
+                querySnapshot.forEach((doc) => {
+                    doc.ref
+                        .delete()
+                        .then(() => {
+                            console.log('Document successfully deleted.');
+                            Snackbar.show({
+                                text: 'Document Deleted Successfully',
+                                duration: Snackbar.LENGTH_SHORT,
+                                backgroundColor: 'green',
+                                textColor: 'white',
+                            });
+                            clearstatedata();
+                        })
+                        .catch((error) => {
+                            console.log("errro while removing document is ", error);
+
+                            Snackbar.show({
+                                text: 'Error While removing Document please try again ',
+                                duration: Snackbar.LENGTH_SHORT,
+                                backgroundColor: 'red',
+                                textColor: 'white',
+                            });
+                        });
+                });
+            })
+            .catch((error) => {
+                console.error('Error getting documents: ', error);
+            });
+
+
+
+
+
+    }
+    const clearstatedata = () => {
+        onChangeTraderName('');
+        onChangePartyName('');
+        onChangeCity('');
+        onChangeAddress('');
+        onChangeMoNo('');
+        onChangeAddress('');
+        onChangeGSTNo('');
+    }
     return (
 
 
@@ -198,42 +333,46 @@ const deleteDataToFireStore=async()=>{
                 ) :
                     (
                         <>
+                                {/* My Search Bar */}
+                            <View style={{
+                                margin: moderateScale(10), flexDirection: 'row',
+                                padding: moderateScale(5),
+                                borderColor: Colors.primary, borderWidth: 2
+                            }}>
+                                <Image
+                                    style={{ width: moderateScale(23), height: moderateScale(23), marginTop: moderateScale(5) ,}}
+                                    source={require('../../assets/search_symbol.png')}
+                                />
+                                <Autocomplete
+                                    clearButtonMode="always"
+                                    style={{ color: 'black', }}
+                                    ref={autocompletetraderRef}
+
+
+                                    data={filteredData}
+                                    defaultValue={query}
+                                    onChangeText={handleInputChange}
+                                    renderItem={renderItem}
+                                    handleItemSelect={handleItemSelect}
+                                    inputContainerStyle={{ borderWidth: 0, marginLeft: moderateScale(5) }}
+                                    listContainerStyle={{ maxHeight: moderateScale(120) }}
+                                    onBlur={() => sethidingtraderdropdown(true)} // Hide on outside click
+                                    onFocus={() => sethidingtraderdropdown(false)} // Show when focused
+                                    hideResults={hidingtraderdropdown}
+                                    // hideResults={hideResultProduct}
+
+                                    flatListProps={{
+
+                                        keyboardShouldPersistTaps: 'always',
+                                        renderItem: renderItem
+                                    }}
+
+                                />
+                            </View>
+
+
                             <View style={styles.sty3}>
-                                <View style={{
-                                    marginVertical: moderateScale(10), flexDirection: 'row',
-                                    paddingHorizontal: moderateScale(5),
-                                    borderColor: Colors.primary, borderWidth: 2
-                                }}>
-                                    <Image
-                                        style={{ width: moderateScale(23), height: moderateScale(23), marginTop: moderateScale(5) }}
-                                        source={require('../../assets/search_symbol.png')}
-                                    />
-                                    <Autocomplete
-                                        clearButtonMode="always"
-                                        style={{ color: 'black', }}
-                                        ref={autocompletetraderRef}
 
-
-                                        data={filteredData}
-                                        defaultValue={query}
-                                        onChangeText={handleInputChange}
-                                        renderItem={renderItem}
-                                        handleItemSelect={handleItemSelect}
-                                        inputContainerStyle={{ borderWidth: 0, marginLeft: moderateScale(5) }}
-                                        listContainerStyle={{ maxHeight: moderateScale(120) }}
-                                        onBlur={() => sethidingtraderdropdown(true)} // Hide on outside click
-                                        onFocus={() => sethidingtraderdropdown(false)} // Show when focused
-                                        hideResults={hidingtraderdropdown}
-                                        // hideResults={hideResultProduct}
-
-                                        flatListProps={{
-
-                                            keyboardShouldPersistTaps: 'always',
-                                            renderItem: renderItem
-                                        }}
-
-                                    />
-                                </View>
                                 <View style={styles.sty6}>
                                     <Text style={styles.sty5}>Company Name </Text>
                                     <Text style={styles.sty7}>*</Text>
@@ -329,14 +468,19 @@ const deleteDataToFireStore=async()=>{
                                     ScreenEditable ?
                                         (
                                             <>
-                                            <TouchableOpacity style={styles.sty18} onPress={deleteDataToFireStore}>
-                                                <Text style={styles.sty17}>Delete</Text>
-                                            </TouchableOpacity>
-                                            <TouchableOpacity style={styles.sty18}
-                                                onPress={updateDataToFirestore}
-                                            >
-                                                <Text style={styles.sty17}>Update</Text>
-                                            </TouchableOpacity>
+                                                <TouchableOpacity style={styles.sty18} onPress={() => setIsModalVisible(true)}>
+                                                    <Text style={styles.sty17}>Delete</Text>
+                                                </TouchableOpacity>
+                                                <TouchableOpacity style={styles.sty18}
+                                                    onPress={updateDataToFirestore}
+                                                >
+                                                    <Text style={styles.sty17}>Update</Text>
+                                                </TouchableOpacity>
+                                                <DeleteConfirmationModal
+                                                    isVisible={isModalVisible}
+                                                    onClose={() => setIsModalVisible(false)}
+                                                    onDelete={deleteDataToFireStore}
+                                                />
                                             </>
                                         ) :
                                         (
@@ -349,10 +493,11 @@ const deleteDataToFireStore=async()=>{
                                                 >
                                                     <Text style={styles.sty17}>Save</Text>
                                                 </TouchableOpacity>
-                                                </>
+                                            </>
                                         )
                                 }
                             </View>
+
                         </>
                     )
 

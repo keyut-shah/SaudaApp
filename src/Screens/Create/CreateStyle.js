@@ -123,10 +123,11 @@ const styles = StyleSheet.create({
 
     },
     sty18:{
+        
         padding:20,
         borderRadius:moderateScale(10),
         backgroundColor:Colors.primary,
-        width:moderateScale(80),
+        // width:moderateScale(10),
         justifyContent:'center',
         alignItems:'center'
     }
