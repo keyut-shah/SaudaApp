@@ -55,50 +55,33 @@ export default UpdateScreen = ({ route, navigation }) => {
 
 
     }, [])
-            // Changes in Autocomplete then we have to change in city an dmono also so make state of both buyer and seller
+    // Changes in Autocomplete then we have to change in city an dmono also so make state of both buyer and seller
 
-            const [buyercity,setBuyerCity]=useState(statementdata?.BuyerData?.city);
-            const [buyermono,setBuyerMoNo]=useState(statementdata?.BuyerData?.mobile);
-            const [sellercity,setSellerCity]= useState(statementdata.SellerData?.city);
-            const [sellermono,setSellerMoNo]=useState(statementdata?.SellerData?.mobile);
+    const [buyercity, setBuyerCity] = useState(statementdata?.BuyerData?.city);
+    const [buyermono, setBuyerMoNo] = useState(statementdata?.BuyerData?.mobile);
+    const [sellercity, setSellerCity] = useState(statementdata.SellerData?.city);
+    const [sellermono, setSellerMoNo] = useState(statementdata?.SellerData?.mobile);
 
-            // customid
-            const [customid,setcustomid]=useState(statementdata?.unique_id);
+    // customid
+    const [customid, setcustomid] = useState(statementdata?.unique_id);
     // Bardan 
     const [selectedBardan, setSelectedBardan] = useState(null);
-    const [selectItemType,setSelectItemType]=useState(null);
+    const [selectItemType, setSelectItemType] = useState(null);
 
 
     useEffect(() => {
         console.log("Selected Bardan", selectedBardan);
     }, [selectedBardan])
 
-    useEffect(() => {
-        // Check the label value and set the corresponding value
-        if (statementdata) { // Assuming `data` is where your labels are coming from
-            console.log("useeffect of statement data --> bardan type",statementdata?.Bardan);
-          if (statementdata?.Bardan === 'Sabardan') {
-                console.log("does my bardan goes in sabardan")
-                setSelectedBardan('Sabardan');
-            // setSelectedBardan({ label: 'Sabardan', value: '1' });
-          } else if (statementdata?.Bardan === 'Bopp') {
-            // setSelectedBardan({ label: 'Bopp', value: '2' });
-            setSelectedBardan('Bopp');
-          } else if (statementdata?.Bardan === 'jute') {
-            // setSelectedBardan({ label: 'Jute', value: '3' });
-            setSelectedBardan('Jute');
-          } else if (statementdata?.Bardan === 'Loose') {
-            // setSelectedBardan({ label: 'loose', value: '4' });
-            setSelectedBardan('Loose');
-          } else {
-            console.log("useeffect of statementdata does it go in else part ")
-            // Default value if the label doesn't match any of the above
-            setSelectedBardan({ label: 'Select Bardan', value: null });
-          }
-        }
-      }, [statementdata]);
-  
+   
 
+    useEffect(() => {
+        console.log("statementdata and bardan type is ==>>",statementdata?.Bardan)
+        if (statementdata) {
+            setSelectedBardan(statementdata?.Bardan)
+            setSelectItemType(statementdata?.Item)
+        }
+    }, [statementdata])
     const showDatePicker = () => {
         setDatePickerVisibility(true);
     };
@@ -146,23 +129,24 @@ export default UpdateScreen = ({ route, navigation }) => {
             return;
         }
         const statementCollection = firestore().collection('statement');
-        const customId=customid;
+        const customId = customid;
+        const saudano=parseInt(Sauda);
         const saudainfo = {
             Bags: Bags,
             BuyerData: selectedBuyerData,
-            Notes:Notes,
-            Payment:Payment,
+            Notes: Notes,
+            Payment: Payment,
             Rate: Rate,
-            SellerData:selectedSellerData,
+            SellerData: selectedSellerData,
             Weight: Weight,
             date: mySelectedDate,
-            sauda_no: Sauda,
+            sauda_no: saudano,
             unique_id: customid,
 
 
         }
-        console.log("My sauda infon coantins==> ",saudainfo)
-        console.log("custom id contians ",customid);
+        console.log("My sauda infon coantins==> ", saudainfo)
+        console.log("custom id contians ", customid);
 
 
         // try {
@@ -208,28 +192,28 @@ export default UpdateScreen = ({ route, navigation }) => {
 
 
         try {
-         
+
             statementCollection.doc(customid).update({
                 Bags: Bags,
                 BuyerData: selectedBuyerData,
-                Notes:Notes,
-                Payment:Payment,
+                Notes: Notes,
+                Payment: Payment,
                 Rate: Rate,
-                SellerData:selectedSellerData,
+                SellerData: selectedSellerData,
                 Weight: Weight,
                 date: mySelectedDate,
                 sauda_no: Sauda,
                 unique_id: customid,
-    
-    
+
+
             }).then(() => {
-              console.log('Data updated successfully');
-              Snackbar.show({
-                text: 'Data Updated Successfully',
-                duration: Snackbar.LENGTH_SHORT,
-                backgroundColor: 'green',
-                textColor: 'white',
-              });
+                console.log('Data updated successfully');
+                Snackbar.show({
+                    text: 'Data Updated Successfully',
+                    duration: Snackbar.LENGTH_SHORT,
+                    backgroundColor: 'green',
+                    textColor: 'white',
+                });
                 // onChangeSellerName('');
                 // onChangeBuyerName('');
                 onChangeRate('');
@@ -250,15 +234,15 @@ export default UpdateScreen = ({ route, navigation }) => {
                 navigation.goBack();
             }
             );
-          } catch (error) {
+        } catch (error) {
             console.error('Error updating data in Firestore: ', error);
             Snackbar.show({
-              text: 'Something Went Wrong. Please try again.',
-              duration: Snackbar.LENGTH_SHORT,
-              backgroundColor: 'red',
-              textColor: 'white',
+                text: 'Something Went Wrong. Please try again.',
+                duration: Snackbar.LENGTH_SHORT,
+                backgroundColor: 'red',
+                textColor: 'white',
             });
-          }
+        }
     }
     useEffect(() => {
         fetchData();
@@ -305,7 +289,7 @@ export default UpdateScreen = ({ route, navigation }) => {
         setSelectedBuyerData(selectedBuyer);
         setBuyerCity(selectedBuyer?.city);
         setBuyerMoNo(selectedBuyer?.mobile);
-        
+
         setbuyerquery(selectedValue);
         sethidingbuyerdropdown(true);
         if (autocompletebuyerRef.current) {
@@ -397,10 +381,10 @@ export default UpdateScreen = ({ route, navigation }) => {
     function handleEdit() {
         console.log("handle edit event method is call so now we can edit the screen");
 
-
+    const saudano=(statementdata?.sauda_no).toString();
         onChangeRate(statementdata?.Rate);
         onChangeWeight(statementdata?.Weight);
-        onChangeSauda(statementdata?.sauda_no);
+        onChangeSauda(saudano);
         onChangeBags(statementdata?.Bags)
         onChangePayment(statementdata?.Payment)
         onChangeNotes(statementdata?.Notes)
@@ -412,9 +396,9 @@ export default UpdateScreen = ({ route, navigation }) => {
         setScreenEditable(true);
     }
 
-    useEffect(()=>{
-console.log("sauda detail for this particular data is ",saudadetail)
-    },[saudadetail])
+    useEffect(() => {
+        console.log("sauda detail for this particular data is ", saudadetail)
+    }, [saudadetail])
 
 
     return (
@@ -484,7 +468,7 @@ console.log("sauda detail for this particular data is ",saudadetail)
 
 
                                     <Autocomplete
-                                  style={{color:'black'}}
+                                        style={{ color: 'black' }}
 
                                         ref={autocompletesellerRef}
                                         // renderTextInput={(props) => <CustomTextInput {...props} />}
@@ -556,10 +540,10 @@ console.log("sauda detail for this particular data is ",saudadetail)
                                 <View style={styles.sty9}>
 
                                     <Autocomplete
-                                    
+
                                         hideResults={hidingbuyerdropdown}
                                         ref={autocompletebuyerRef}
-                                        style={{color:'black'}}
+                                        style={{ color: 'black' }}
 
                                         // renderTextInput={(props) =>( <CustomTextInput {...props} />)}
                                         data={buyerfilterdata}
@@ -692,11 +676,11 @@ console.log("sauda detail for this particular data is ",saudadetail)
                                     // />
                                     <DropdownComponent
 
-                                    value={selectedBardan}
-                                    onChange={item=>{
-                                      setSelectedBardan(item?.label)
-                                    }}
-                                  />      
+                                        value={selectedBardan}
+                                        onChange={item => {
+                                            setSelectedBardan(item?.label)
+                                        }}
+                                    />
                                     // <Dropdown
                                     //     style={styles.dropdown}
                                     //     placeholderStyle={styles.placeholderStyle}
@@ -709,7 +693,7 @@ console.log("sauda detail for this particular data is ",saudadetail)
                                     //     value={selectedBardan}
                                     //     onChange={value => {
                                     //         setSelectedBardan(value);
-                                            
+
                                     //     }}
                                     // />
                                 ) :
@@ -721,8 +705,8 @@ console.log("sauda detail for this particular data is ",saudadetail)
                             }
                         </View>
 
-                            {/* Item */}
-                            <View style={styles.sty12}>
+                        {/* Item */}
+                        <View style={styles.sty12}>
                             <Text style={styles.sty5}>Item Type </Text>
                             {ScreenEditable && <Text style={styles.sty7}>*</Text>}
                             <Text style={[styles.sty5, { marginLeft: 3 }]}>:</Text>
@@ -736,12 +720,12 @@ console.log("sauda detail for this particular data is ",saudadetail)
                                     // />
                                     <ItemDropdownComponent
 
-                                    value={selectItemType}
-                                    onChange={item=>{
-                                      setSelectItemType(item?.label)
-                                    }}
-                                  />      
-                                
+                                        value={selectItemType}
+                                        onChange={item => {
+                                            setSelectItemType(item?.label)
+                                        }}
+                                    />
+
                                 ) :
                                     (
                                         <Text

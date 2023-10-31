@@ -44,7 +44,7 @@ const ItemDropdownComponent = ({ value, onChange }) => {
         if (data && data.itemtype) {
 
           const arrayData = data.itemtype;
-          console.log("Array data contains ", arrayData);
+          // console.log("Array data contains ", arrayData);
           const transformedArray = arrayData.map(value => ({
             label: value,
             value,

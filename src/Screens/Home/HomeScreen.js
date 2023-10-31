@@ -64,11 +64,11 @@ export default HomeScreen = ({ navigation }) => {
 
   // bardan state
   const [selectedBardan, setSelectedBardan] = useState('');
-  const [selectItem,setSelectItem]=useState('');
-  
-useEffect(()=>{
+  const [selectItem, setSelectItem] = useState('');
 
-},[selectedBardan])
+  useEffect(() => {
+
+  }, [selectedBardan])
 
   function generateUniqueId() {
     // Create a timestamp as a base for the ID (you can adjust the format)
@@ -83,6 +83,25 @@ useEffect(()=>{
     return uniqueId;
   }
 
+  async function updatelastsaudanumber(newValue){
+    console.log("New sauda value is",newValue );
+    const docRef = firestore().collection('extra').doc('ezlL8qFWj4DSOYCnhAwd');
+    try {
+      const extraCollection = await docRef.get();
+  
+      if (extraCollection.exists) {
+        // The document exists, so you can update the value
+        await docRef.update({
+          lastregisternumber: newValue
+        });
+      } else {
+        console.log('Document does not exist');
+      }
+    } catch (error) {
+      console.error('Error updating value:', error);
+    }
+  };
+  
   // Add Data to the Server
   const addDataansShareData = () => {
     // validation check
@@ -93,7 +112,7 @@ useEffect(()=>{
     console.log("Bags contains ", Bags);
     console.log("Weight contains ", Weight);
     console.log("Keyut here does it go here or else where ")
-    
+
     if (query.trim() === '' || Sauda.trim() == '' || buyerquery.trim() == '' || Rate.trim() == '' || Bags.trim() == '' || Weight.trim() == '') {
       Snackbar.show({
         text: 'Please write Empty Data ',
@@ -107,8 +126,10 @@ useEffect(()=>{
     console.log('Generated custom ID:', customID);
 
     const usersCollection = firestore().collection('statement');
+    const saudano = parseInt(Sauda);
+    updatelastsaudanumber(saudano);
     const saudainfo = {
-      sauda_no: Sauda,
+      sauda_no: saudano,
       date: mySelectedDate,
       Rate: Rate,
       Bags: Bags,
@@ -118,8 +139,8 @@ useEffect(()=>{
       BuyerData: selectedBuyerData,
       Notes: Notes,
       Payment: Payment,
-      Bardan:selectedBardan,
-      Item:selectItem,
+      Bardan: selectedBardan,
+      Item: selectItem,
     }
     try {
       usersCollection.doc(customID).set(saudainfo).then(docRef => {
@@ -199,7 +220,27 @@ useEffect(()=>{
 
     // Clean up the listener when the component unmounts
     return () => unsubscribe();
+
+
   }, []);
+
+
+  const fetchlastsaudano = async () => {
+    const extraCollection = await firestore().collection('extra').doc('ezlL8qFWj4DSOYCnhAwd').get();
+    const data = extraCollection.data();
+
+    let current_sauda = (data?.lastregisternumber);
+    current_sauda += 1;
+    console.log(current_sauda)
+
+
+    onChangeSauda((current_sauda).toString());
+  }
+
+  useEffect(() => {
+    fetchlastsaudano();
+    // setlastsaudano(extraCollection.)
+  }, [])
 
   // handle input change done 
   const handleInputChange = (text) => {
@@ -242,7 +283,7 @@ useEffect(()=>{
     // console.log("My render item contains ", item);
     return (
       <TouchableOpacity
-        style={{ borderWidth:1,borderColor:'grey' }}
+        style={{ borderWidth: 1, borderColor: 'grey' }}
         onPress={() => handleItemSelect(item)}>
         <View style={{ backgroundColor: 'white', justifyContent: 'center', alignItems: 'center' }}>
           <Text
@@ -339,7 +380,7 @@ useEffect(()=>{
             <View style={styles.sty9}>
 
               <Autocomplete
-              style={{color:'black'}}
+                style={{ color: 'black' }}
                 ref={autocompletesellerRef}
                 // renderTextInput={(props) => <CustomTextInput {...props} />}
                 hideResults={hidingsellerdropdown}
@@ -349,15 +390,15 @@ useEffect(()=>{
                 renderItem={renderItem}
                 handleItemSelect={handleItemSelect}
                 inputContainerStyle={{ borderColor: Colors.primary, }}
-                 listContainerStyle={{maxHeight:moderateScale(120)}}
+                listContainerStyle={{ maxHeight: moderateScale(120) }}
                 flatListProps={{
-                  
+
                   keyboardShouldPersistTaps: 'always',
                   renderItem: renderItem
                 }}
                 onBlur={() => sethidingsellerdropdown(true)} // Hide on outside click
                 onFocus={() => sethidingsellerdropdown(false)} // Show when focused
-               
+
 
               />
               <TouchableOpacity style={styles.sty10}
@@ -387,7 +428,7 @@ useEffect(()=>{
             <View style={styles.sty9}>
 
               <Autocomplete
-              style={{color:'black'}}
+                style={{ color: 'black' }}
                 hideResults={hidingbuyerdropdown}
                 ref={autocompletebuyerRef}
 
@@ -401,10 +442,10 @@ useEffect(()=>{
                   keyboardShouldPersistTaps: 'always',
                   renderItem: renderbuyeritem
                 }}
-                listContainerStyle={{maxHeight:moderateScale(120)}}
+                listContainerStyle={{ maxHeight: moderateScale(120) }}
                 onBlur={() => sethidingbuyerdropdown(true)} // Hide on outside click
                 onFocus={() => sethidingbuyerdropdown(false)} // Show when focused
-                
+
               />
               <TouchableOpacity style={styles.sty10}
                 onPress={() => navigation.navigate('CreateScreen')}
@@ -469,25 +510,25 @@ useEffect(()=>{
             </View>
             {/* Bardan Type */}
             <View style={styles.sty12}>
-            <Text style={styles.sty5}>Bardan </Text>
+              <Text style={styles.sty5}>Bardan </Text>
               <Text style={styles.sty7}>*</Text>
               <DropdownComponent
 
                 value={selectedBardan}
-                onChange={item=>{
+                onChange={item => {
                   setSelectedBardan(item?.label)
                 }}
               />
             </View>
             {/* Item Type */}
             <View style={styles.sty12}>
-            <Text style={styles.sty5}>ItemType </Text>
+              <Text style={styles.sty5}>ItemType </Text>
               <Text style={styles.sty7}>*</Text>
               <ItemDropdownComponent
 
                 value={selectItem}
-                onChange={item=>{
-                  console.log("item contains ",item);
+                onChange={item => {
+                  console.log("item contains ", item);
                   setSelectItem(item?.label)
                 }}
               />

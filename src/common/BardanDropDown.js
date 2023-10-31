@@ -25,12 +25,12 @@ import firestore from '@react-native-firebase/firestore';
 
 const DropdownComponent = ({ value, onChange }) => {
 
-  console.log("My value contains -->", value);
+  // console.log("My value contains -->", value);
   // console.log("On change props contains ", onChange);
   // console.log("Why dropdown update This quickly ");
   const [selectedValue, setSelectedValue] = useState(value);
   const [bardandata, setbardandata] = useState([]);
-  console.log("Selected value contaons ",selectedValue)
+  // console.log("Selected value contaons ",selectedValue)
   useEffect(() => {
     console.log("bardan data in useeffect contains ", bardandata);
   }, [bardandata])
@@ -39,13 +39,13 @@ const DropdownComponent = ({ value, onChange }) => {
     bardancollection.onSnapshot((docSnapshot) => {
       if (docSnapshot.exists) {
         const data = docSnapshot.data();
-        console.log("object contains ", data);
-
+        // console.log("object contains ", data);
+// 
 
         if (data && data.bardantype) {
 
           const arrayData = data.bardantype;
-          console.log("Array data contains ", arrayData);
+          // console.log("Array data contains ", arrayData);
           const transformedArray = arrayData.map(value => ({
             label: value,
             value,
