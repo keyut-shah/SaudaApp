@@ -25,7 +25,7 @@ export default UpdateScreen = ({ route, navigation }) => {
     const [BardayType, onChangeBardanType] = useState('');
     const [Payment, onChangePayment] = useState('');
     const [Notes, onChangeNotes] = useState('');
-    const [mySelectedDate, setSelectedDate] = useState(moment(new Date()).format('DD/MM/YYYY'));
+    const [mySelectedDate, setSelectedDate] = useState(moment(new Date(statementdata?.date)).format('DD/MM/YYYY'));
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
 
 
@@ -73,15 +73,21 @@ export default UpdateScreen = ({ route, navigation }) => {
         console.log("Selected Bardan", selectedBardan);
     }, [selectedBardan])
 
-   
+
 
     useEffect(() => {
-        console.log("statementdata and bardan type is ==>>",statementdata?.Bardan)
+        console.log("statementdata and bardan type is ==>>", statementdata?.Bardan)
         if (statementdata) {
             setSelectedBardan(statementdata?.Bardan)
             setSelectItemType(statementdata?.Item)
         }
     }, [statementdata])
+
+
+    useEffect(() => {
+        console.log("My Selected Date ", mySelectedDate);
+
+    }, [mySelectedDate]);
     const showDatePicker = () => {
         setDatePickerVisibility(true);
     };
@@ -110,7 +116,7 @@ export default UpdateScreen = ({ route, navigation }) => {
 
         return uniqueId;
     }
-
+   
     const addDataansShareData = () => {
         // validation check
         console.log("Seller name contians ", query);
@@ -130,7 +136,11 @@ export default UpdateScreen = ({ route, navigation }) => {
         }
         const statementCollection = firestore().collection('statement');
         const customId = customid;
-        const saudano=parseInt(Sauda);
+        const saudano = parseInt(Sauda);
+        console.log("SELECTED DATE ==>", mySelectedDate);
+        const convertdate = moment(mySelectedDate, "DD/MM/YYYY").format();
+        console.log("converted date contains", convertdate);
+        
         const saudainfo = {
             Bags: Bags,
             BuyerData: selectedBuyerData,
@@ -139,7 +149,7 @@ export default UpdateScreen = ({ route, navigation }) => {
             Rate: Rate,
             SellerData: selectedSellerData,
             Weight: Weight,
-            date: mySelectedDate,
+            date: convertdate,
             sauda_no: saudano,
             unique_id: customid,
 
@@ -195,16 +205,18 @@ export default UpdateScreen = ({ route, navigation }) => {
 
             statementCollection.doc(customid).update({
                 Bags: Bags,
+                Bardan:selectedBardan,
                 BuyerData: selectedBuyerData,
+                Item:selectItemType,
                 Notes: Notes,
                 Payment: Payment,
                 Rate: Rate,
                 SellerData: selectedSellerData,
                 Weight: Weight,
-                date: mySelectedDate,
-                sauda_no: Sauda,
+                date: convertdate,
+                sauda_no: saudano,
                 unique_id: customid,
-
+                
 
             }).then(() => {
                 console.log('Data updated successfully');
@@ -381,7 +393,7 @@ export default UpdateScreen = ({ route, navigation }) => {
     function handleEdit() {
         console.log("handle edit event method is call so now we can edit the screen");
 
-    const saudano=(statementdata?.sauda_no).toString();
+        const saudano = (statementdata?.sauda_no).toString();
         onChangeRate(statementdata?.Rate);
         onChangeWeight(statementdata?.Weight);
         onChangeSauda(saudano);

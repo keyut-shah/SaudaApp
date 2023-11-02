@@ -6,6 +6,7 @@ import styles from './StatementStyle';
 import { moderateScale } from 'react-native-size-matters';
 // import { useNavigation } from '@react-naviation/native';
 import { useNavigation } from '@react-navigation/native';
+import moment from 'moment';
 const handledatarowpress=(data)=>{
     console.log("data in press contains ",data)
 }
@@ -33,7 +34,7 @@ const DataRow = ({ data }) => {
                 numberOfLines={1}
                 
                 ellipsizeMode='tail'
-                 style={styles.headertext}>{data.date}</Text>
+                 style={styles.headertext}>{moment(new Date(data?.date)).format('DD/MM/YYYY')}</Text>
             </View>
 
             <View style={styles.seller_container}>
@@ -52,13 +53,13 @@ const DataRow = ({ data }) => {
                 <Text
                  numberOfLines={1}
                  ellipsizeMode='tail'
-                style={styles.headertext}>{data.Rate}</Text>
+                style={styles.headertext}>{data?.Rate}</Text>
             </View>
             <View style={styles.bags_container}>
                 <Text 
                  
                  ellipsizeMode='tail'
-                style={styles.headertext}>{data.Bags}</Text>
+                style={styles.headertext}>{data?.Bags}</Text>
             </View>
             <View style={styles.bardan_container}>
                 <Text 

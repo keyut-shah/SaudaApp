@@ -6,6 +6,7 @@ import firestore from '@react-native-firebase/firestore';
 import NewBardanScreen from '../Bardan/NewBardanScreen';
 import ItemTypeScreen from '../ItemType/ItemTypeScreen';
 import styles from './WorkStyle';
+import DynamicForm from '../NewDemoScreen';
 export default WorkScreen = ({ navigation }) => {
 
 
@@ -26,6 +27,12 @@ export default WorkScreen = ({ navigation }) => {
             <TouchableOpacity style={styles.datacontainer}
                 activeOpacity={0.5}
                 onPress={() => navigation.navigate('ItemTypeScreen')}
+            >
+                <Text style={styles.datatext}>Create Item Bardan</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.datacontainer}
+                activeOpacity={0.5}
+                onPress={() => navigation.navigate('DynamicForm')}
             >
                 <Text style={styles.datatext}>Create Item Bardan</Text>
             </TouchableOpacity>

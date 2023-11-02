@@ -40,8 +40,11 @@ export default HomeScreen = ({ navigation }) => {
 
   const handleConfirm = (date) => {
     console.log("A date has been picked: ", date);
+    console.log("",moment(new Date(date)).format())
     const formattedDate = moment(date).format('DD/MM/YYYY');
     setSelectedDate(formattedDate);
+    const isodate=moment(new Date(date)).format()
+    setFormState({ ...formState, date:  isodate});
     hideDatePicker();
   };
 
@@ -66,9 +69,7 @@ export default HomeScreen = ({ navigation }) => {
   const [selectedBardan, setSelectedBardan] = useState('');
   const [selectItem, setSelectItem] = useState('');
 
-  useEffect(() => {
 
-  }, [selectedBardan])
 
   function generateUniqueId() {
     // Create a timestamp as a base for the ID (you can adjust the format)
@@ -83,12 +84,12 @@ export default HomeScreen = ({ navigation }) => {
     return uniqueId;
   }
 
-  async function updatelastsaudanumber(newValue){
-    console.log("New sauda value is",newValue );
+  async function updatelastsaudanumber(newValue) {
+    console.log("New sauda value is", newValue);
     const docRef = firestore().collection('extra').doc('ezlL8qFWj4DSOYCnhAwd');
     try {
       const extraCollection = await docRef.get();
-  
+
       if (extraCollection.exists) {
         // The document exists, so you can update the value
         await docRef.update({
@@ -101,7 +102,7 @@ export default HomeScreen = ({ navigation }) => {
       console.error('Error updating value:', error);
     }
   };
-  
+
   // Add Data to the Server
   const addDataansShareData = () => {
     // validation check
@@ -155,7 +156,7 @@ export default HomeScreen = ({ navigation }) => {
         onChangeBuyerName('');
         onChangeRate('');
         onChangeWeight('');
-        onChangeSauda('');
+      
         onChangeBags('')
         onChangePayment('')
         onChangeNotes('')
@@ -224,17 +225,30 @@ export default HomeScreen = ({ navigation }) => {
 
   }, []);
 
-
+  const [lastsaudano, setlastsaudano] = useState('');
   const fetchlastsaudano = async () => {
-    const extraCollection = await firestore().collection('extra').doc('ezlL8qFWj4DSOYCnhAwd').get();
-    const data = extraCollection.data();
+    const extraCollection = await firestore().collection('extra').doc('ezlL8qFWj4DSOYCnhAwd');
+    const unsubscribe = extraCollection.onSnapshot((doc) => {
+      if (doc.exists) {
 
-    let current_sauda = (data?.lastregisternumber);
-    current_sauda += 1;
-    console.log(current_sauda)
+        const data = doc.data();
+
+        let current_sauda = (data?.lastregisternumber);
+        current_sauda += 1;
+        console.log("Current Sauda No is ", current_sauda)
+        // set current sauda no to the current 
+        handleFieldChange('sauda_no', current_sauda, 0);
+        // set uniqueid also
+        handleFieldChange('unique_id', generateUniqueId(), 0);
+        onChangeSauda((current_sauda).toString());
+        setlastsaudano((current_sauda).toString());
+      }
+    });
+    return () => {
+      unsubscribe();
+    };
 
 
-    onChangeSauda((current_sauda).toString());
   }
 
   useEffect(() => {
@@ -242,6 +256,11 @@ export default HomeScreen = ({ navigation }) => {
     // setlastsaudano(extraCollection.)
   }, [])
 
+  useEffect(() => {
+    // This is for to add data to my formstate when user comes first time on screen
+    const formattedDate = moment(new Date()).format();
+    setFormState({ ...formState, date: formattedDate });
+  }, [])
   // handle input change done 
   const handleInputChange = (text) => {
     sethidingsellerdropdown(false);
@@ -260,6 +279,7 @@ export default HomeScreen = ({ navigation }) => {
     console.log("On select the item from the dropdown ", selectedValue);
     const selectedSeller = data.find((item) => item.companyname === selectedValue);
     console.log("Selected Seller object contains ", selectedSeller)
+    setFormState({ ...formState, SellerData: selectedSeller });
     setSelectedSellerData(selectedSeller);
     setQuery(selectedValue);
     sethidingsellerdropdown(true);
@@ -272,6 +292,7 @@ export default HomeScreen = ({ navigation }) => {
 
     const selectedBuyer = data.find((item) => item.companyname === selectedValue);
     console.log("Selected Seller object contains ", selectedBuyer)
+    setFormState({ ...formState, BuyerData: selectedBuyer });
     setSelectedBuyerData(selectedBuyer);
     setbuyerquery(selectedValue);
     sethidingbuyerdropdown(true);
@@ -322,18 +343,215 @@ export default HomeScreen = ({ navigation }) => {
   }
 
 
-  function CustomTextInput(props) {
-    return (
-      <TextInput
-        {...props}
-        style={{
-          color: 'black',
 
-        }}
-      />
-    );
+  // All the new thing is here 
+  const [formState, setFormState] = useState({
+
+    BuyerData: '',
+    SellerData: '',
+    date: '',
+
+    dynamicFields: [{
+      Rate: '',
+      Weight: '',
+      Bags: '',
+      Bardan: '',
+      Item: '',
+      Payment: '',
+      Notes: '',
+      sauda_no: '',
+      unique_id: '',
+    },]
+  });
+
+  const handleFieldChange = (fieldName, text, index) => {
+    setFormState((prevState) => {
+      const updatedFields = [...prevState.dynamicFields];
+      updatedFields[index][fieldName] = text;
+      return {
+        ...prevState,
+        dynamicFields: updatedFields,
+      };
+    });
+  };
+  const addDynamicField = () => {
+    console.log("does add method call or not ");
+    const customID = generateUniqueId();
+    let saudano = parseInt(lastsaudano);
+    saudano += 1;
+    setlastsaudano(saudano);
+    setFormState((prevState) => ({
+      ...prevState,
+      dynamicFields: [
+        ...prevState.dynamicFields,
+        {
+          Rate: '',
+          Weight: '',
+          Bags: '',
+          Bardan: '',
+          Item: '',
+          Payment: '',
+          Notes: '',
+          sauda_no: saudano,
+          unique_id: customID,
+        },
+      ],
+    }));
+  };
+  // while trying to remove from the index i encounder 1 problem the problem is that
+  //  if current no is 6 and add 7,8 while removeing 7 no still at so index specefic remove done later on
+  // because of that i think there is problem in data also 
+  // problem is in only dropdown and sauda no only other field works fine 
+  const removeDynamicField = () => {
+
+
+    setFormState((prevState) => {
+      const updatedFields = [...prevState.dynamicFields];
+      if (updatedFields.length > 1) {
+        let lastsauda = parseInt(lastsaudano);
+        lastsauda -= 1;
+        setlastsaudano(lastsauda.toString());
+        updatedFields.pop(); // Remove the last field
+      }
+      return { ...prevState, dynamicFields: updatedFields };
+    });
+  };
+  function ClearStates(){
+    onChangeSellerName('');
+    onChangeBuyerName('');
+    onChangeRate('');
+    onChangeWeight('');
+    onChangeSauda('');
+    onChangeBags('')
+    onChangePayment('')
+    onChangeNotes('')
+    onChangePayment('')
+    setQuery('');
+    setbuyerquery('');
+    setSelectedSellerData('');
+    setSelectedBuyerData('');
+    onChangeNotes('');
+    onChangePayment('');
+    setSelectedBardan('');
+    setSelectItem('');
+    setSelectedDate(moment(new Date()).format('DD/MM/YYYY'))
+  let uniquenumber=parseInt(lastsaudano);
+  uniquenumber+=1;
+  onChangeSauda(uniquenumber);
+    setFormState({
+
+      BuyerData: '',
+      SellerData: '',
+      date: moment(new Date()).format(),
+  
+      dynamicFields: [{
+        Rate: '',
+        Weight: '',
+        Bags: '',
+        Bardan: '',
+        Item: '',
+        Payment: '',
+        Notes: '',
+        sauda_no: uniquenumber,
+        unique_id: '',
+      },]})
   }
+  const saveDataToFirestore = async () => {
+    const dataToSave = { ...formState };
+    const { BuyerData, SellerData, date, dynamicFields } = formState;
+    console.log("usr click on save button now lets check some props");
+    console.log("Data i have to save is ", dataToSave);
+    console.log("buyerdata ->", BuyerData);
+    console.log("SellerData -->", SellerData);
+    console.log("date-->", date);
+    console.log('dynamic fields ', dynamicFields);
+    if (query.trim() === '' || buyerquery.trim() == '') {
+      Snackbar.show({
+        text: 'Please write Empty Data ',
+        duration: Snackbar.LENGTH_SHORT,
+        backgroundColor: 'red',
+        textColor: 'white',
+      });
+      return;
+    }
+    
+      // const statementListRef = firestore().collection('statementList');
+      // const batch = firestore().batch();
 
+      // dynamicFields.forEach((fieldSet) => {
+      //   const dataToSave = {
+      //     BuyerData,
+      //     SellerData,
+      //     date,
+      //     ...fieldSet,
+      //   };
+
+      //   const newDocumentRef = statementListRef.doc();
+      //   batch.set(newDocumentRef, dataToSave);
+      // });
+      // const newDocumentRef = await statementListRef.add(dataToSave);
+
+      updatelastsaudanumber(parseInt(lastsaudano));
+      const statementListRef = firestore().collection('statement');
+
+      // dynamicFields.forEach(async (fieldSet) => {
+      //   const uniqueid = fieldSet?.unique_id;
+      //   try {
+      //     const batching = firestore().batch(); // Create a new batch for each set of fields
+
+      //     const dataToSave = {
+      //       BuyerData,
+      //       SellerData,
+      //       date,
+      //       ...fieldSet,
+      //     };
+
+      //     const newDocumentRef = statementListRef.doc(uniqueid);
+      //     batching.set(newDocumentRef, dataToSave);
+
+      //     await batching.commit(); // Commit the batch for this set of fields
+      //     console.log('Data saved to Firestore');
+      //   } catch (error) {
+      //     console.error('Error saving data to Firestore:', error);
+      //   }
+      // });
+    
+      const batch = firestore().batch(); // Create a single batch for all the writes
+
+      dynamicFields.forEach(async (fieldSet) => {
+        const uniqueid = fieldSet?.unique_id;
+        const dataToSave = {
+          BuyerData,
+          SellerData,
+          date,
+          ...fieldSet,
+        };
+    
+        const newDocumentRef = statementListRef.doc(uniqueid);
+        batch.set(newDocumentRef, dataToSave);
+      });
+    
+      try {
+        await batch.commit(); // Commit the batch with all the writes
+        Snackbar.show({
+          text: 'Data Added Successfully ',
+          duration: Snackbar.LENGTH_SHORT,
+          backgroundColor: 'green',
+          textColor: 'white',
+        });
+        ClearStates();
+        
+        console.log('Data saved to Firestore');
+      } catch (error) {
+        console.error('Error saving data to Firestore:', error);
+      }
+  };
+  useEffect(()=>{
+console.log(" sauda no ",lastsaudano)
+  },[lastsaudano])
+  useEffect(() => {
+    console.log("Form State value contains ==>>>>", formState)
+  }, [formState])
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: Colors.statusbar }}>
       <LinearGradient colors={['#f1f7fc', '#e8f2ff', '#cedff5']} style={{ flex: 1, }}>
@@ -345,12 +563,19 @@ export default HomeScreen = ({ navigation }) => {
 
           <Text style={[styles.sty5, {}]}>Sauda No:</Text>
           <Text style={styles.sty7}>*</Text>
-          <TextInput
+          {/* <TextInput
             style={[styles.sty15, { marginLeft: moderateScale(10), width: moderateScale(60) }]}
-            onChangeText={onChangeSauda}
+            onChangeText={(text) => {
+              console.log("text contains--> ", typeof (text));
+              handleFieldChange('sauda_no', parseInt(text), 0);
+              onChangeSauda(text);
+              console.log("formstate", Sauda);
+            }}
             value={Sauda}
             keyboardType='numeric'
-          />
+          /> */}
+          
+          <Text style={{color:'black',marginHorizontal:moderateScale(15)}}>{Sauda}</Text>
           <TouchableOpacity onPress={showDatePicker} style={{ marginLeft: moderateScale(20) }}>
             <Image
               style={{ width: moderateScale(25), height: moderateScale(25) }}
@@ -471,106 +696,151 @@ export default HomeScreen = ({ navigation }) => {
           </View>
 
           {/* other common thing  */}
-          <View style={[styles.sty3, { paddingHorizontal: moderateScale(10) }]}>
-            {/* Rate */}
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Text style={styles.sty5}>Rate </Text>
-              <Text style={styles.sty7}>*</Text>
-              <Text style={[styles.sty5, { marginLeft: 3 }]}>:</Text>
-              <TextInput
-                style={[styles.sty15, { marginLeft: moderateScale(20) }]}
-                onChangeText={onChangeRate}
-                value={Rate}
+          {formState.dynamicFields.map((field, index) => (
 
-              />
+            // console.log("My Field Value is  ", field),
+            // console.log("Current index of dynamic field is ", index),
+            <View key={index}>
+              <View style={[styles.sty3,]}>
+                {(index == 0) ?
+                  (
+
+                    <View style={styles.bottomview}>
+                      <TouchableOpacity style={styles.AddContainer}
+                        onPress={addDynamicField}
+                      >
+                        <Text style={styles.AddText}>+</Text>
+
+                      </TouchableOpacity>
+                    </View>
+                  )
+                  : (
+                    <View style={styles.bottomview}>
+                      <TouchableOpacity style={styles.SubContainer}
+                        onPress={removeDynamicField}
+                      >
+                        <Text style={styles.AddText}>__</Text>
+
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                {/* Rate */}
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Text style={styles.sty5}>Rate</Text>
+                  {/* <Text style={styles.sty7}>*</Text> */}
+                  <Text style={[styles.sty5, { marginLeft: 3 }]}>:</Text>
+                  <TextInput
+                    style={[styles.sty15, { marginLeft: moderateScale(20) }]}
+                    onChangeText={(text) => handleFieldChange('Rate', text, index)}
+                    value={formState.dynamicFields[index].Rate}
+                  />
+                </View>
+                {/*  weight*/}
+                <View style={styles.sty12}>
+                  <Text style={styles.sty5}>Weight</Text>
+                  {/* <Text style={styles.sty7}>*</Text> */}
+                  <Text style={[styles.sty5, { marginLeft: 3 }]}>:</Text>
+                  <TextInput
+                    style={styles.sty15}
+                    onChangeText={(text) => handleFieldChange('Weight', text, index)}
+                    value={formState.dynamicFields[index].Weight}
+                  />
+                </View>
+                {/* Bags */}
+                <View style={styles.sty12}>
+                  <Text style={styles.sty5}>Bags</Text>
+                  {/* <Text style={styles.sty7}>*</Text> */}
+                  <Text style={[styles.sty5, { marginLeft: 3 }]}>:</Text>
+                  <TextInput
+                    style={[styles.sty15, { marginLeft: moderateScale(15), justifyContent: 'center', alignItems: 'center' }]}
+                    onChangeText={(text) => handleFieldChange('Bags', text, index)}
+                    value={formState.dynamicFields[index].Bags}
+                  />
+                </View>
+                {/* Bardan Type */}
+                <View style={styles.sty12}>
+                  <Text style={styles.sty5}>Bardan</Text>
+                  {/* <Text style={styles.sty7}>*</Text> */}
+                  <DropdownComponent
+                    value={formState.dynamicFields[index].Bardan}
+                    onChange={(item) => {
+                      handleFieldChange('Bardan', item?.label, index);
+                    }}
+                  />
+                </View>
+
+                {/* Item Type */}
+                <View style={styles.sty12}>
+                  <Text style={styles.sty5}>ItemType</Text>
+                  {/* <Text style={styles.sty7}>*</Text> */}
+                  <ItemDropdownComponent
+
+                    value={formState.dynamicFields[index].Item}
+                    onChange={(item) => {
+                      handleFieldChange('Item', item?.label, index);
+                    }}
+                  />
+                </View>
+                {/* Payment */}
+                <View style={styles.sty12}>
+                  <Text style={styles.sty5}>Payment : </Text>
+                  <TextInput
+                    style={[styles.sty15, { marginLeft: moderateScale(0), flex: 1 }]}
+                    onChangeText={(text) => handleFieldChange('Payment', text, index)}
+                    value={formState.dynamicFields[index].Payment}
+
+                  />
+                </View>
+
+                {/* Note */}
+                <View style={styles.sty12}>
+                  <Text style={styles.sty5}>Note :</Text>
+                </View>
+                <View style={{ marginTop: moderateScale(10) }}>
+                  <TextInput
+                    style={styles.sty16}
+                    onChangeText={(text) => handleFieldChange('Notes', text, index)}
+                    value={formState.dynamicFields[index].Notes}
+                  />
+                </View>
+
+
+              </View>
             </View>
-            {/*  weight*/}
-            <View style={styles.sty12}>
-              <Text style={styles.sty5}>Weight </Text>
-              <Text style={styles.sty7}>*</Text>
-              <Text style={[styles.sty5, { marginLeft: 3 }]}>:</Text>
-              <TextInput
-                style={styles.sty15}
-                onChangeText={onChangeWeight}
-                value={Weight}
+          ))}
 
-              />
-            </View>
-            {/* Bags */}
-            <View style={styles.sty12}>
-              <Text style={styles.sty5}>Bags </Text>
-              <Text style={styles.sty7}>*</Text>
-              <Text style={[styles.sty5, { marginLeft: 3 }]}>:</Text>
-              <TextInput
-                style={[styles.sty15, { marginLeft: moderateScale(15), justifyContent: 'center', alignItems: 'center' }]}
-                onChangeText={onChangeBags}
-                value={Bags}
-
-              />
-            </View>
-            {/* Bardan Type */}
-            <View style={styles.sty12}>
-              <Text style={styles.sty5}>Bardan </Text>
-              <Text style={styles.sty7}>*</Text>
-              <DropdownComponent
-
-                value={selectedBardan}
-                onChange={item => {
-                  setSelectedBardan(item?.label)
-                }}
-              />
-            </View>
-            {/* Item Type */}
-            <View style={styles.sty12}>
-              <Text style={styles.sty5}>ItemType </Text>
-              <Text style={styles.sty7}>*</Text>
-              <ItemDropdownComponent
-
-                value={selectItem}
-                onChange={item => {
-                  console.log("item contains ", item);
-                  setSelectItem(item?.label)
-                }}
-              />
-            </View>
-            {/* Payment */}
-            <View style={styles.sty12}>
-              <Text style={styles.sty5}>Payment</Text>
-
-              <Text style={[styles.sty5, { marginLeft: 1 }]}>:</Text>
-              <TextInput
-                style={[styles.sty15, { marginLeft: moderateScale(0), flex: 1 }]}
-                onChangeText={onChangePayment}
-                value={Payment}
-
-              />
-            </View>
-
-            {/* Note */}
-            <View style={styles.sty12}>
-              <Text style={styles.sty5}>Note </Text>
-
-              <Text style={[styles.sty5, { marginLeft: 1 }]}>:</Text>
-
-            </View>
-            <View style={{ marginTop: moderateScale(10) }}>
-              <TextInput
-                style={styles.sty16}
-                onChangeText={onChangeNotes}
-                value={Notes}
-
-              />
-            </View>
-
-          </View>
           <View style={styles.bottomview}>
+            <TouchableOpacity style={styles.SaveContainer}
+              onPress={saveDataToFirestore}
+            >
+              <Text style={styles.SaveText}>Save</Text>
+
+            </TouchableOpacity>
+          </View>
+          {/* <View style={styles.bottomview}>
             <TouchableOpacity style={styles.SaveContainer}
               onPress={addDataansShareData}
             >
               <Text style={styles.SaveText}>Save</Text>
 
             </TouchableOpacity>
+          </View> */}
+          {/* <View style={styles.bottomview}>
+            <TouchableOpacity style={styles.SaveContainer}
+              onPress={removeDynamicField}
+            >
+              <Text style={styles.SaveText}>Remove</Text>
+
+            </TouchableOpacity>
           </View>
+          <View style={styles.bottomview}>
+            <TouchableOpacity style={styles.SaveContainer}
+              onPress={addDynamicField}
+            >
+              <Text style={styles.SaveText}>Add</Text>
+
+            </TouchableOpacity>
+          </View> */}
         </ScrollView>
 
       </LinearGradient>

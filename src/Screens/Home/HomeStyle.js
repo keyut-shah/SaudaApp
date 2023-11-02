@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
     },
     sty12: {
         flexDirection: 'row',
-        marginTop: moderateScale(10),
+        marginTop: moderateScale(15),
         alignItems: 'center',
 
     },
@@ -146,7 +146,35 @@ const styles = StyleSheet.create({
         color: 'black',
         fontSize:moderateScale(14),
         fontWeight:'400'
-    }
+    },
+    AddContainer:{
+        position:'absolute',
+        top:moderateScale(-5),
+        right:moderateScale(0),
+       
+        // paddingHorizontal:moderateScale(100),
+        borderRadius: moderateScale(10),
+        // backgroundColor: Colors.primary,
+        
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+    AddText:{
+        color: Colors.primary,
+        fontSize:moderateScale(30)
+    },
+    SubContainer:{
+        position:'absolute',
+        top:moderateScale(-25),
+        right:moderateScale(0),
+       
+        // paddingHorizontal:moderateScale(100),
+        borderRadius: moderateScale(10),
+        // backgroundColor: Colors.primary,
+        
+        justifyContent: 'center',
+        alignItems: 'flex-start'
+    },
 
 })
 

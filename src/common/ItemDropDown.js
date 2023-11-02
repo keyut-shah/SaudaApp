@@ -30,15 +30,15 @@ const ItemDropdownComponent = ({ value, onChange }) => {
   // console.log("Why dropdown update This quickly ");
   const [selectedValue, setSelectedValue] = useState(value);
   const [itemdata, setitemdata] = useState([]);
-  useEffect(() => {
-    console.log("bardan data in useeffect contains ", itemdata);
-  }, [itemdata])
+  // useEffect(() => {
+  //   console.log("bardan data in useeffect contains ", itemdata);
+  // }, [itemdata])
   const fetchdata = async () => {
     const bardancollection = await firestore().collection('extra').doc('9A0AG6Ag4oAPQV2YLx3u');
     bardancollection.onSnapshot((docSnapshot) => {
       if (docSnapshot.exists) {
         const data = docSnapshot.data();
-        console.log("object contains ", data);
+        // console.log("object contains ", data);
 
 
         if (data && data.itemtype) {
@@ -99,7 +99,7 @@ export default ItemDropdownComponent;
 
 const styles = StyleSheet.create({
   dropdown: {
-    margin: 16,
+    margin: 10,
     height: 50,
     borderBottomColor: 'gray',
     borderBottomWidth: 0.5,

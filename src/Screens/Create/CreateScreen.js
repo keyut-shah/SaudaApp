@@ -192,65 +192,46 @@ function CreateScreen({ navigation }) {
             name: TraaderName,
             customid: uniqueid,
         }
+        console.log("MY updatetraders data contains ",updatetraderdata);
         // Also trying to update in statement data but how can i update thats the challenfe 
         // maybe find my solution where seller.uniqueid== current maybe work letts try it 
-        firestore()
-            .collection('users')
-            .doc(uniqueid)
-            .update(updatetraderdata)
+        try {
+            await firestore()
+                .collection('users')
+                .doc(uniqueid)
+                .update(updatetraderdata)
 
 
-        const statementCollection = firestore().collection('statement');
-        const statementref = statementCollection.where('SellerData.customid', '==', uniqueid)
-            .get()
-            .then((querySnapshot) => {
-                querySnapshot.forEach((doc) => {
-                    const statementRef = statementCollection.doc(doc.id);
-                    // Update the nested 'user1' field within 'sellerdata'
-                    statementRef.update({ 'SellerData': updatetraderdata });
-                });
-                console.log("user data update successfully");
+            const statementCollection = firestore().collection('statement');
+            const sellerStatementQuerySnapshot = await statementCollection.where('SellerData.customid', '==', uniqueid).get();
+            sellerStatementQuerySnapshot.forEach((doc) => {
+                const statementRef = statementCollection.doc(doc.id);
+                statementRef.update({ 'SellerData': updatetraderdata });
+            });
 
-            })
-            .catch((error) => {
-                console.log("Error while updating user details");
-                Snackbar.show({
-                    text: 'Error While Updating data .Please Try Again',
-                    duration: Snackbar.LENGTH_SHORT,
-                    backgroundColor: 'red',
-                    textColor: 'white',
-                });
-                return;
-            })
+            const buyerStatementQuerySnapshot = await statementCollection.where('BuyerData.customid', '==', uniqueid).get();
 
-        statementCollection.where('BuyerData.customid', '==', uniqueid)
-            .get()
-            .then((querySnapshot) => {
-                querySnapshot.forEach((doc) => {
-                    const statementRef = statementCollection.doc(doc.id);
-                    // Update the nested 'user1' field within 'sellerdata'
-                    statementRef.update({ 'SellerData': updatetraderdata });
-                });
-                console.log("user data update successfully");
-
-            })
-            .catch((error) => {
-                console.log("Error while updating user details");
-                Snackbar.show({
-                    text: 'Error While Updating data .Please Try Again',
-                    duration: Snackbar.LENGTH_SHORT,
-                    backgroundColor: 'red',
-                    textColor: 'white',
-                });
-                return;
-            })
-        Snackbar.show({
-            text: 'User Update successfully',
-            duration: Snackbar.LENGTH_SHORT,
-            backgroundColor: 'green',
-            textColor: 'white',
-        });
-        clearstatedata();
+            buyerStatementQuerySnapshot.forEach((doc) => {
+                const statementRef = statementCollection.doc(doc.id);
+                statementRef.update({ 'BuyerData': updatetraderdata });
+            });
+            console.log("User data updated successfully");
+            Snackbar.show({
+                text: 'User Update successfully',
+                duration: Snackbar.LENGTH_SHORT,
+                backgroundColor: 'green',
+                textColor: 'white',
+            });
+            clearstatedata();
+        } catch (error) {
+            console.log("Error while updating user details: " + error);
+            Snackbar.show({
+                text: 'Error While Updating data. Please Try Again',
+                duration: Snackbar.LENGTH_SHORT,
+                backgroundColor: 'red',
+                textColor: 'white',
+            });
+        }
     }
     const deleteDataToFireStore = async () => {
         console.log("Here trying to delete data of the firestore ");
@@ -333,14 +314,14 @@ function CreateScreen({ navigation }) {
                 ) :
                     (
                         <>
-                                {/* My Search Bar */}
+                            {/* My Search Bar */}
                             <View style={{
                                 margin: moderateScale(10), flexDirection: 'row',
                                 padding: moderateScale(5),
                                 borderColor: Colors.primary, borderWidth: 2
                             }}>
                                 <Image
-                                    style={{ width: moderateScale(23), height: moderateScale(23), marginTop: moderateScale(5) ,}}
+                                    style={{ width: moderateScale(23), height: moderateScale(23), marginTop: moderateScale(5), }}
                                     source={require('../../assets/search_symbol.png')}
                                 />
                                 <Autocomplete
@@ -450,6 +431,7 @@ function CreateScreen({ navigation }) {
                                 </View>
                                 <View style={styles.sty9}>
                                     <TextInput
+                                    numberOfLines={2}
                                         style={styles.sty8}
                                         onChangeText={onChangeAddress}
                                         value={address}

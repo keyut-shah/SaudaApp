@@ -31,9 +31,9 @@ const DropdownComponent = ({ value, onChange }) => {
   const [selectedValue, setSelectedValue] = useState(value);
   const [bardandata, setbardandata] = useState([]);
   // console.log("Selected value contaons ",selectedValue)
-  useEffect(() => {
-    console.log("bardan data in useeffect contains ", bardandata);
-  }, [bardandata])
+  // useEffect(() => {
+  //   console.log("bardan data in useeffect contains ", bardandata);
+  // }, [bardandata])
   const fetchdata = async () => {
     const bardancollection = await firestore().collection('extra').doc('4RIEUMiNldcGJ26goLnw');
     bardancollection.onSnapshot((docSnapshot) => {
@@ -110,7 +110,7 @@ export default DropdownComponent;
 
 const styles = StyleSheet.create({
   dropdown: {
-    margin: 16,
+    marginHorizontal: 16,
     height: 50,
     borderBottomColor: 'gray',
     borderBottomWidth: 0.5,

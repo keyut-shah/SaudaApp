@@ -8,6 +8,8 @@ import CreateScreen from './Screens/Create/CreateScreen';
 import UpdateDataScreen from './Screens/UpdateData/UpdateDataScreen';
 import NewBardanScreen from './Screens/Bardan/NewBardanScreen';
 import ItemTypeScreen from './Screens/ItemType/ItemTypeScreen';
+import DynamicForm from './Screens/NewDemoScreen';
+
 const Stack = createNativeStackNavigator();
 
 
@@ -33,6 +35,7 @@ const MainRouteConfig=()=>{
           <Stack.Screen name="UpdateDataScreen" component={UpdateDataScreen} />
           <Stack.Screen name="NewBardanScreen" component={NewBardanScreen} />
           <Stack.Screen name="ItemTypeScreen" component={ItemTypeScreen} />
+          <Stack.Screen name="DynamicForm" component={DynamicForm} />
         
 
         </Stack.Navigator>
