@@ -475,46 +475,10 @@ export default HomeScreen = ({ navigation }) => {
       return;
     }
     
-      // const statementListRef = firestore().collection('statementList');
-      // const batch = firestore().batch();
-
-      // dynamicFields.forEach((fieldSet) => {
-      //   const dataToSave = {
-      //     BuyerData,
-      //     SellerData,
-      //     date,
-      //     ...fieldSet,
-      //   };
-
-      //   const newDocumentRef = statementListRef.doc();
-      //   batch.set(newDocumentRef, dataToSave);
-      // });
-      // const newDocumentRef = await statementListRef.add(dataToSave);
-
+  
       updatelastsaudanumber(parseInt(lastsaudano));
       const statementListRef = firestore().collection('statement');
 
-      // dynamicFields.forEach(async (fieldSet) => {
-      //   const uniqueid = fieldSet?.unique_id;
-      //   try {
-      //     const batching = firestore().batch(); // Create a new batch for each set of fields
-
-      //     const dataToSave = {
-      //       BuyerData,
-      //       SellerData,
-      //       date,
-      //       ...fieldSet,
-      //     };
-
-      //     const newDocumentRef = statementListRef.doc(uniqueid);
-      //     batching.set(newDocumentRef, dataToSave);
-
-      //     await batching.commit(); // Commit the batch for this set of fields
-      //     console.log('Data saved to Firestore');
-      //   } catch (error) {
-      //     console.error('Error saving data to Firestore:', error);
-      //   }
-      // });
     
       const batch = firestore().batch(); // Create a single batch for all the writes
 
@@ -563,17 +527,7 @@ console.log(" sauda no ",lastsaudano)
 
           <Text style={[styles.sty5, {}]}>Sauda No:</Text>
           <Text style={styles.sty7}>*</Text>
-          {/* <TextInput
-            style={[styles.sty15, { marginLeft: moderateScale(10), width: moderateScale(60) }]}
-            onChangeText={(text) => {
-              console.log("text contains--> ", typeof (text));
-              handleFieldChange('sauda_no', parseInt(text), 0);
-              onChangeSauda(text);
-              console.log("formstate", Sauda);
-            }}
-            value={Sauda}
-            keyboardType='numeric'
-          /> */}
+        
           
           <Text style={{color:'black',marginHorizontal:moderateScale(15)}}>{Sauda}</Text>
           <TouchableOpacity onPress={showDatePicker} style={{ marginLeft: moderateScale(20) }}>
@@ -817,30 +771,7 @@ console.log(" sauda no ",lastsaudano)
 
             </TouchableOpacity>
           </View>
-          {/* <View style={styles.bottomview}>
-            <TouchableOpacity style={styles.SaveContainer}
-              onPress={addDataansShareData}
-            >
-              <Text style={styles.SaveText}>Save</Text>
-
-            </TouchableOpacity>
-          </View> */}
-          {/* <View style={styles.bottomview}>
-            <TouchableOpacity style={styles.SaveContainer}
-              onPress={removeDynamicField}
-            >
-              <Text style={styles.SaveText}>Remove</Text>
-
-            </TouchableOpacity>
-          </View>
-          <View style={styles.bottomview}>
-            <TouchableOpacity style={styles.SaveContainer}
-              onPress={addDynamicField}
-            >
-              <Text style={styles.SaveText}>Add</Text>
-
-            </TouchableOpacity>
-          </View> */}
+         
         </ScrollView>
 
       </LinearGradient>

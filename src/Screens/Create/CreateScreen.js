@@ -41,6 +41,9 @@ function CreateScreen({ navigation }) {
     const [isModalVisible, setIsModalVisible] = useState(false);
 
     const [uniqueid, setuniqueid] = useState('');
+
+    // Brokerage
+    const[traderbrokerage,settraderbrokerage]=useState('');
     const fetchData = async () => {
         console.log("does fetch user method call")
         const usersCollection = firestore().collection('users');
@@ -107,7 +110,7 @@ function CreateScreen({ navigation }) {
         setScreenEditable(true);
         setQuery(selectedValue);
         sethidingtraderdropdown(true);
-
+        settraderbrokerage((selectedTrader?.brokerage).toString())
         if (sethidingtraderdropdown.current) {
             sethidingtraderdropdown.current.blur();
         }
@@ -152,6 +155,7 @@ function CreateScreen({ navigation }) {
             gst: gst_no,
             mobile: mobile_no,
             customid: customID,
+            brokerage:parseFloat(traderbrokerage)
         };
         try {
             usersCollection.set(sellerdata).then(docRef => {
@@ -191,6 +195,7 @@ function CreateScreen({ navigation }) {
             mobile: mobile_no,
             name: TraaderName,
             customid: uniqueid,
+            brokerage:parseFloat(traderbrokerage),
         }
         console.log("MY updatetraders data contains ",updatetraderdata);
         // Also trying to update in statement data but how can i update thats the challenfe 
@@ -284,6 +289,7 @@ function CreateScreen({ navigation }) {
         onChangeMoNo('');
         onChangeAddress('');
         onChangeGSTNo('');
+        settraderbrokerage('');
     }
     return (
 
@@ -351,7 +357,7 @@ function CreateScreen({ navigation }) {
                                 />
                             </View>
 
-
+                            <ScrollView style={{}}>
                             <View style={styles.sty3}>
 
                                 <View style={styles.sty6}>
@@ -424,6 +430,19 @@ function CreateScreen({ navigation }) {
 
                                     />
                                 </View>
+                                {/* Brokerage */}
+                                <View style={styles.sty12}>
+                                    <Text style={styles.sty5}>Brokerage</Text>
+                                    {/* <Text style={styles.sty7}>*</Text> */}
+                                    <Text style={[styles.sty5, { marginLeft: 3 }]}>:</Text>
+                                    <TextInput
+
+                                        style={styles.sty15}
+                                        onChangeText={settraderbrokerage}
+                                        value={traderbrokerage}
+
+                                    />
+                                </View>
                                 {/* address */}
                                 <View style={[styles.sty6, { marginTop: moderateScale(10) }]}>
                                     <Text style={styles.sty5}>Address :</Text>
@@ -444,8 +463,7 @@ function CreateScreen({ navigation }) {
 
 
                             </View>
-
-                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginHorizontal: moderateScale(10) }}>
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginHorizontal: moderateScale(10),marginBottom:moderateScale(20) }}>
                                 {
                                     ScreenEditable ?
                                         (
@@ -480,6 +498,8 @@ function CreateScreen({ navigation }) {
                                 }
                             </View>
 
+                            </ScrollView>
+                           
                         </>
                     )
 

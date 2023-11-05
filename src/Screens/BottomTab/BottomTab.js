@@ -5,6 +5,10 @@ import HomeScreen from "../Home/HomeScreen";
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import StatementScreen from "../Statement/StatementScreen";
 import WorkScreen from "../Work/WorkScreen";
+import BottomSheet, {
+    BottomSheetModal,
+    BottomSheetModalProvider,
+} from '@gorhom/bottom-sheet';
 function NetworkScreen({navigation}){
     return(
         <View>
@@ -30,6 +34,7 @@ const Tab = createBottomTabNavigator();
 function BottomTab({navigation}){
  
     return (
+        <BottomSheetModalProvider>
         <Tab.Navigator
         // tabBar={props => <MyTabBar {...props} />}
         screenOptions={{
@@ -42,11 +47,12 @@ function BottomTab({navigation}){
         <Tab.Screen name="Home" component={HomeScreen} />
         <Tab.Screen name="Statement" component={StatementScreen} />
         <Tab.Screen name="WorkScreen" component={WorkScreen} />
+      </Tab.Navigator>
+        </BottomSheetModalProvider>
       
         
   
       
-      </Tab.Navigator>
     );
   
 }
