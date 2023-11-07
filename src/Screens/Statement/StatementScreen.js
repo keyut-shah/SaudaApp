@@ -33,12 +33,16 @@ export default StatementScreen = ({ navigation }) => {
         setTimeout(() => { console.log("Set timeout function") }, 1000);
         // fetch again 
         setRefreshing(false);
+
         fetchstatementfirsttime();
     };
 
     useEffect(() => {
         console.log("Last document value ", lastDocument);
     }, [lastDocument])
+    useEffect(()=>{
+        console.log("selected option for the search text ",selectedOption);
+    },[selectedOption])
     const fetchNextPage = async () => {
         console.log("Fetch nextpage method is call");
         let statementRef = firestore()
@@ -80,13 +84,13 @@ export default StatementScreen = ({ navigation }) => {
             .limit(pageSize);
         const unsubscribe = statementRef.onSnapshot((querySnapshot) => {
             const newStatementData = querySnapshot.docs.map((doc) => doc.data());
-            console.log("new statement is added to statement data ", newStatementData);
+            // console.log("new statement is added to statement data ", newStatementData);
             setstatementdata(newStatementData);
-            console.log('Statement contains --> ', statementdata);
+            // console.log('Statement contains --> ', statementdata);
 
             if (querySnapshot.docs.length > 0) {
-                console.log("Does my query snapshot length >0 ");
-                console.log("Query snapshot value contains ", querySnapshot.docs);
+                // console.log("Does my query snapshot length >0 ");
+                // console.log("Query snapshot value contains ", querySnapshot.docs);
                 const newLastDocument = querySnapshot.docs[querySnapshot.docs.length - 1];
                 setLastDocument(newLastDocument);
             }
@@ -101,16 +105,16 @@ export default StatementScreen = ({ navigation }) => {
         fetchstatementfirsttime();
     }, []);
 
- 
+
     async function fetchStatementbyName(searchtext) {
-      
-            console.log("Querying for ", searchtext);
-            if (!searchtext.trim()) 
-            {
-                setLastDocument('');
-                fetchstatementfirsttime();
-            }
-            else{
+
+        console.log("Querying for ", searchtext);
+        if (!searchtext.trim()) {
+            console.log("does we are redirect to the fetchfirst time method because our search text =0")
+            setLastDocument('');
+            fetchstatementfirsttime();
+        }
+        else {
             const statementCollection = firestore().collection('statement');
             try {
                 const buyerSnapshot = await statementCollection
@@ -124,25 +128,53 @@ export default StatementScreen = ({ navigation }) => {
                     .where('SellerData.companyname', '>=', searchtext) // Start at or after the search text
                     .where('SellerData.companyname', '<=', searchtext + '\uf8ff') // End at or before the search text with a special character to include all possible matches
                     // .orderBy('date', 'desc') // Order the results by date in descending order
-                        // .limit(pageSize)
+                    // .limit(pageSize)
                     .get();
 
-                    const buyerData = buyerSnapshot.docs.map((doc) => doc.data());
-                          const sellerData = sellerSnapshot.docs.map((doc) => doc.data());
+                const buyerData = buyerSnapshot.docs.map((doc) => doc.data());
+                const sellerData = sellerSnapshot.docs.map((doc) => doc.data());
 
-                          console.log("Buyer data contains ",buyerData);
-                          console.log("Seller Data contains ",sellerData);
-                          const combineData = [...buyerData, ...sellerData].sort((a,b)=>a.sauda_no-b.sauda_no);
-                          setstatementdata(combineData);
+                console.log("Buyer data contains ", buyerData);
+                console.log("Seller Data contains ", sellerData);
+                const combineData = [...buyerData, ...sellerData].sort((a, b) => a.sauda_no - b.sauda_no);
+                setstatementdata(combineData);
                 // Rest of your code to process the snapshots
             } catch (error) {
                 console.error('Error fetching statement data:', error);
             }
         }
-       
+
+    }
+
+    async function fetchStatementbyNumber(searchtext){
+        console.log("My search sauda no in search bar for number  ",searchtext);
+        if (!searchtext.trim()) {
+            console.log("does we are redirect to the fetchfirst time method because our search text =0")
+            setLastDocument('');
+            fetchstatementfirsttime();
+        }
+        else{
+            console.log("does it gone in else part for the fetchstatement by number ");
+            const statementCollection = firestore().collection('statement');
+            try {
+            const numberSnapshot = Snapshot=await statementCollection
+            .where('sauda_no'==parseInt(searchtext))
+            .orderBy('sauda_no','asc')
+            .get();
+                console.log("so whats going wrong dont knwo but show filepath must be a string or instance of filepaty ")
+            const saudaData=numberSnapshot.docs.map((doc)=>doc.data());
+            console.log("sauda data contains wher match is ",saudaData);
+            setstatementdata(saudaData);
+
+            }
+            catch(error)
+            {
+                console.log("Error while doing search by number is ",error);
+            }
+        }
     }
     useEffect(() => {
-        console.log("Statement data value in useEffect ", statementdata);
+        // console.log("Statement data value in useEffect ", statementdata);
 
     }, [statementdata])
 
@@ -180,11 +212,24 @@ export default StatementScreen = ({ navigation }) => {
                         ellipsizeMode='tail'
                         style={[styles.headertext,]}>{data?.SellerData?.companyname}</Text>
                 </View>
+                <View style={styles.city_container}>
+                    <Text
+                        numberOfLines={1}
+                        ellipsizeMode='tail'
+                        style={[styles.headertext,]}>{data?.SellerData?.city}</Text>
+                </View>
+
                 <View style={styles.seller_container}>
                     <Text
                         numberOfLines={1}
                         ellipsizeMode='tail'
                         style={[styles.headertext,]}>{data?.BuyerData?.companyname}</Text>
+                </View>
+                <View style={styles.city_container}>
+                    <Text
+                        numberOfLines={1}
+                        ellipsizeMode='tail'
+                        style={[styles.headertext,]}>{data?.BuyerData?.city}</Text>
                 </View>
                 <View style={styles.rate_container}>
                     <Text
@@ -198,12 +243,12 @@ export default StatementScreen = ({ navigation }) => {
                         ellipsizeMode='tail'
                         style={styles.headertext}>{data?.Bags}</Text>
                 </View>
-                <View style={styles.bardan_container}>
+                {/* <View style={styles.bardan_container}>
                     <Text
 
                         ellipsizeMode='tail'
                         style={styles.headertext}>{data?.Bardan}</Text>
-                </View>
+                </View> */}
             </TouchableOpacity>
         );
     }
@@ -215,7 +260,29 @@ export default StatementScreen = ({ navigation }) => {
     const handlesearchtext = (text) => {
         console.log("on change text value method call ", text);
         setsearchtext(text);
-        fetchStatementbyName(searchtext);
+        if(selectedOption=='0')
+        {
+            // search by date
+            console.log("search by date");
+        }
+        else if(selectedOption=='1')
+        {
+            console.log("does it goes to the select option by name ");
+            fetchStatementbyName(text);
+        }
+        else   if(selectedOption=='2'){
+            console.log("does it goes to select option by number ");
+            console.log("Also it goes in else part so my search text is ",searchtext);
+            fetchStatementbyNumber(text);
+        }
+        else  if(selectedOption=='3'){
+            console.log("fetch by city ")
+        }
+        else{
+            // default if any thing gone wrong 
+            console.log("this is calling first time method as something went wrong so default case")
+            fetchstatementfirsttime();
+        }
     }
     useEffect(() => {
         console.log("search text contains ", searchtext);
@@ -360,8 +427,14 @@ export default StatementScreen = ({ navigation }) => {
                         <View style={styles.seller_container}>
                             <Text style={[styles.headertext, { marginHorizontal: moderateScale(25) }]}>Seller Name</Text>
                         </View>
+                        <View style={styles.city_container}>
+                            <Text style={[styles.headertext, { marginHorizontal: moderateScale(25) }]}>City</Text>
+                        </View>
                         <View style={styles.seller_container}>
                             <Text style={[styles.headertext, { marginHorizontal: moderateScale(25) }]}>Buyer Name</Text>
+                        </View>
+                        <View style={styles.city_container}>
+                            <Text style={[styles.headertext, { marginHorizontal: moderateScale(25) }]}>City</Text>
                         </View>
                         <View style={styles.rate_container}>
                             <Text style={styles.headertext}>Rate</Text>
@@ -369,9 +442,9 @@ export default StatementScreen = ({ navigation }) => {
                         <View style={styles.bags_container}>
                             <Text style={styles.headertext}>Bags</Text>
                         </View>
-                        <View style={styles.bardan_container}>
+                        {/* <View style={styles.bardan_container}>
                             <Text style={styles.headertext}>Bardan</Text>
-                        </View>
+                        </View> */}
                     </View>
                     <FlatList
                         // onEndReached={fetchNextPage}

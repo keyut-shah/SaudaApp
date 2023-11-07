@@ -40,11 +40,11 @@ export default HomeScreen = ({ navigation }) => {
 
   const handleConfirm = (date) => {
     console.log("A date has been picked: ", date);
-    console.log("",moment(new Date(date)).format())
+    console.log("", moment(new Date(date)).format())
     const formattedDate = moment(date).format('DD/MM/YYYY');
     setSelectedDate(formattedDate);
-    const isodate=moment(new Date(date)).format()
-    setFormState({ ...formState, date:  isodate});
+    const isodate = moment(new Date(date)).format()
+    setFormState({ ...formState, date: isodate });
     hideDatePicker();
   };
 
@@ -70,7 +70,11 @@ export default HomeScreen = ({ navigation }) => {
   const [selectItem, setSelectItem] = useState('');
 
 
+  const [totalquantity, settotalquantity] = useState('');
 
+  // useEffect(()=>{
+
+  // },[])
   function generateUniqueId() {
     // Create a timestamp as a base for the ID (you can adjust the format)
     const timestamp = new Date().getTime();
@@ -104,87 +108,7 @@ export default HomeScreen = ({ navigation }) => {
   };
 
   // Add Data to the Server
-  const addDataansShareData = () => {
-    // validation check
-    console.log("Seller name contians ", query);
-    console.log("Sauda no contains ", Sauda);
-    console.log("Buyer ", buyerquery);
-    console.log("Rate val ", Rate);
-    console.log("Bags contains ", Bags);
-    console.log("Weight contains ", Weight);
-    console.log("Keyut here does it go here or else where ")
 
-    if (query.trim() === '' || Sauda.trim() == '' || buyerquery.trim() == '' || Rate.trim() == '' || Bags.trim() == '' || Weight.trim() == '') {
-      Snackbar.show({
-        text: 'Please write Empty Data ',
-        duration: Snackbar.LENGTH_SHORT,
-        backgroundColor: 'red',
-        textColor: 'white',
-      });
-      return;
-    }
-    const customID = generateUniqueId();
-    console.log('Generated custom ID:', customID);
-
-    const usersCollection = firestore().collection('statement');
-    const saudano = parseInt(Sauda);
-    updatelastsaudanumber(saudano);
-    const saudainfo = {
-      sauda_no: saudano,
-      date: mySelectedDate,
-      Rate: Rate,
-      Bags: Bags,
-      Weight: Weight,
-      unique_id: customID,
-      SellerData: selectedSellerData,
-      BuyerData: selectedBuyerData,
-      Notes: Notes,
-      Payment: Payment,
-      Bardan: selectedBardan,
-      Item: selectItem,
-    }
-    try {
-      usersCollection.doc(customID).set(saudainfo).then(docRef => {
-        console.log("Data added doc ref conatins  DOCREF==>  ", docRef)
-        Snackbar.show({
-          text: 'Data Added Successfully ',
-          duration: Snackbar.LENGTH_SHORT,
-          backgroundColor: 'green',
-          textColor: 'white',
-        });
-        onChangeSellerName('');
-        onChangeBuyerName('');
-        onChangeRate('');
-        onChangeWeight('');
-      
-        onChangeBags('')
-        onChangePayment('')
-        onChangeNotes('')
-        onChangePayment('')
-        setQuery('');
-        setbuyerquery('');
-        setSelectedSellerData('');
-        setSelectedBuyerData('');
-        onChangeNotes('');
-        onChangePayment('');
-        setSelectedBardan('');
-        setSelectItem('');
-
-      })
-
-    } catch (error) {
-
-
-
-      console.error('Error adding data to Firestore: ', error);
-      Snackbar.show({
-        text: 'Something Went Wrong Please try again',
-        duration: Snackbar.LENGTH_SHORT,
-        backgroundColor: 'red',
-        textColor: 'white',
-      });
-    }
-  }
   // useEffect(() => {
   //   fetchData();
   // }, []);
@@ -281,6 +205,8 @@ export default HomeScreen = ({ navigation }) => {
     console.log("Selected Seller object contains ", selectedSeller)
     setFormState({ ...formState, SellerData: selectedSeller });
     setSelectedSellerData(selectedSeller);
+    setsellerbrokerage(selectedSeller?.brokerage.toString());
+    handlebrokeragevalueonsellerselect(selectedSeller);
     setQuery(selectedValue);
     sethidingsellerdropdown(true);
     if (autocompletesellerRef.current) {
@@ -294,12 +220,58 @@ export default HomeScreen = ({ navigation }) => {
     console.log("Selected Seller object contains ", selectedBuyer)
     setFormState({ ...formState, BuyerData: selectedBuyer });
     setSelectedBuyerData(selectedBuyer);
+    setbuyerbrokerage(selectedBuyer?.brokerage.toString());
     setbuyerquery(selectedValue);
+    handlebrokeragevalueonbuyerselect(selectedBuyer);
     sethidingbuyerdropdown(true);
     if (autocompletebuyerRef.current) {
       autocompletebuyerRef.current.blur();
     }
   };
+  function handlebrokeragevalueonsellerselect(selectedSeller) {
+    console.log("Handle brokerage value on seller select")
+    console.log("My selected seller contains ", selectedSeller);
+
+    const sellerbrokerage = selectedSeller?.brokerage;
+    setFormState(prevState => {
+
+      const updateDynamicFields = prevState.dynamicFields.map((dynamicField) => {
+        const bags = dynamicField.Bags || 0;
+        const updateSellerBrokerage = parseFloat(bags) * parseFloat(sellerbrokerage);
+        console.log("My brokerage value for the seller ", updateSellerBrokerage);
+        return {
+          ...dynamicField,
+          sellerbrokerage: updateSellerBrokerage,
+        };
+      });
+      return {
+        ...prevState,
+        dynamicFields: updateDynamicFields,
+      };
+    })
+  }
+  function handlebrokeragevalueonbuyerselect(selectedbuyer) {
+    console.log("Handle brokerage value on seller select")
+    console.log("My selected seller contains ", selectedbuyer);
+
+    const buyerbrokerage = selectedbuyer?.brokerage;
+    setFormState(prevState => {
+
+      const updateDynamicFields = prevState.dynamicFields.map((dynamicField) => {
+        const bags = dynamicField.Bags || 0;
+        const updateBuyerBrokerage = parseFloat(bags) * parseFloat(buyerbrokerage);
+        console.log("My brokerage value for the buyer ", updateBuyerBrokerage);
+        return {
+          ...dynamicField,
+          buyerbrokerage: updateBuyerBrokerage,
+        };
+      });
+      return {
+        ...prevState,
+        dynamicFields: updateDynamicFields,
+      };
+    })
+  }
   const renderItem = ({ item }) => {
     // console.log("My render item contains ", item);
     return (
@@ -361,6 +333,10 @@ export default HomeScreen = ({ navigation }) => {
       Notes: '',
       sauda_no: '',
       unique_id: '',
+      quantity: 0,
+      sellerbrokerage: 0,
+      buyerbrokerage: 0,
+
     },]
   });
 
@@ -374,6 +350,47 @@ export default HomeScreen = ({ navigation }) => {
       };
     });
   };
+  const handleFieldBagChange = (fieldName, text, index) => {
+    const { BuyerData, SellerData, date, dynamicFields } = formState;
+    
+    setFormState((prevState) => {
+      // Update the Bags field for the specific object
+      const updatedField = [...prevState.dynamicFields];
+      updatedField[index][fieldName] = text;
+      const weight = parseFloat(updatedField[index].Weight)
+      const updatedQuantity=weight*parseFloat(text);
+      console.log("My quantity value is ", updatedQuantity);
+      // Calculate the updated sellerbrokerage for the specific object
+      const updatedSellerBrokerage = parseFloat(text) * SellerData?.brokerage;
+      const updateBuyerBrokerage = parseFloat(text) * BuyerData?.brokerage;
+      // const updateWeightData=parseFload(text)*
+      // Update the sellerbrokerage value for the specific object
+      updatedField[index].sellerbrokerage = updatedSellerBrokerage;
+      updatedField[index].buyerbrokerage = updateBuyerBrokerage;
+      updatedField[index].quantity = updatedQuantity;
+
+      return {
+        ...prevState,
+        dynamicFields: updatedField,
+      };
+    });
+
+  }
+  const handleFieldWeightChange=(fieldName,text,index)=>{
+    setFormState((prevState)=>{
+      const updatedField = [...prevState.dynamicFields];
+      updatedField[index][fieldName] = text;
+      const bags=parseFloat(updatedField[index].Bags);
+      const updatedQuantity=bags*parseFloat(text);
+      console.log("My updated quantity is ",updatedQuantity);
+      updatedField[index].quantity = updatedQuantity;
+
+      return{
+        ...prevState,
+        dynamicFields:updatedField,
+      }
+    })
+  }
   const addDynamicField = () => {
     console.log("does add method call or not ");
     const customID = generateUniqueId();
@@ -394,6 +411,9 @@ export default HomeScreen = ({ navigation }) => {
           Notes: '',
           sauda_no: saudano,
           unique_id: customID,
+          quantity: '',
+          sellerbrokerage: '',
+          buyerbrokerage: '',
         },
       ],
     }));
@@ -416,7 +436,7 @@ export default HomeScreen = ({ navigation }) => {
       return { ...prevState, dynamicFields: updatedFields };
     });
   };
-  function ClearStates(){
+  function ClearStates() {
     onChangeSellerName('');
     onChangeBuyerName('');
     onChangeRate('');
@@ -425,25 +445,22 @@ export default HomeScreen = ({ navigation }) => {
     onChangeBags('')
     onChangePayment('')
     onChangeNotes('')
-    onChangePayment('')
     setQuery('');
     setbuyerquery('');
     setSelectedSellerData('');
     setSelectedBuyerData('');
-    onChangeNotes('');
-    onChangePayment('');
     setSelectedBardan('');
     setSelectItem('');
     setSelectedDate(moment(new Date()).format('DD/MM/YYYY'))
-  let uniquenumber=parseInt(lastsaudano);
-  uniquenumber+=1;
-  onChangeSauda(uniquenumber);
+    let uniquenumber = parseInt(lastsaudano);
+    uniquenumber += 1;
+    onChangeSauda(uniquenumber);
     setFormState({
 
       BuyerData: '',
       SellerData: '',
       date: moment(new Date()).format(),
-  
+
       dynamicFields: [{
         Rate: '',
         Weight: '',
@@ -454,7 +471,11 @@ export default HomeScreen = ({ navigation }) => {
         Notes: '',
         sauda_no: uniquenumber,
         unique_id: '',
-      },]})
+        quantity: '',
+        sellerbrokerage: '',
+        buyerbrokerage: '',
+      },]
+    })
   }
   const saveDataToFirestore = async () => {
     const dataToSave = { ...formState };
@@ -474,48 +495,113 @@ export default HomeScreen = ({ navigation }) => {
       });
       return;
     }
-    
-  
-      updatelastsaudanumber(parseInt(lastsaudano));
-      const statementListRef = firestore().collection('statement');
 
-    
-      const batch = firestore().batch(); // Create a single batch for all the writes
 
-      dynamicFields.forEach(async (fieldSet) => {
-        const uniqueid = fieldSet?.unique_id;
-        const dataToSave = {
-          BuyerData,
-          SellerData,
-          date,
-          ...fieldSet,
-        };
-    
-        const newDocumentRef = statementListRef.doc(uniqueid);
-        batch.set(newDocumentRef, dataToSave);
+    updatelastsaudanumber(parseInt(lastsaudano));
+    const statementListRef = firestore().collection('statement');
+
+
+    const batch = firestore().batch(); // Create a single batch for all the writes
+
+    dynamicFields.forEach(async (fieldSet) => {
+      const uniqueid = fieldSet?.unique_id;
+      console.log("Fieldset value contains ",fieldSet);
+      console.log("Unique id contains ====>>>",uniqueid);
+      const dataToSave = {
+        BuyerData,
+        SellerData,
+        date,
+        ...fieldSet,
+      };
+
+      const newDocumentRef = statementListRef.doc(uniqueid);
+      batch.set(newDocumentRef, dataToSave);
+    });
+
+    try {
+      await batch.commit(); // Commit the batch with all the writes
+      Snackbar.show({
+        text: 'Data Added Successfully ',
+        duration: Snackbar.LENGTH_SHORT,
+        backgroundColor: 'green',
+        textColor: 'white',
       });
-    
-      try {
-        await batch.commit(); // Commit the batch with all the writes
-        Snackbar.show({
-          text: 'Data Added Successfully ',
-          duration: Snackbar.LENGTH_SHORT,
-          backgroundColor: 'green',
-          textColor: 'white',
-        });
-        ClearStates();
-        
-        console.log('Data saved to Firestore');
-      } catch (error) {
-        console.error('Error saving data to Firestore:', error);
-      }
+      ClearStates();
+
+      console.log('Data saved to Firestore');
+    } catch (error) {
+      console.error('Error saving data to Firestore:', error);
+    }
   };
-  useEffect(()=>{
-console.log(" sauda no ",lastsaudano)
-  },[lastsaudano])
+  useEffect(() => {
+    console.log(" sauda no ", lastsaudano)
+  }, [lastsaudano])
   useEffect(() => {
     console.log("Form State value contains ==>>>>", formState)
   }, [formState])
+
+  const [sellerbrokerage, setsellerbrokerage] = useState("0");
+  const [buyerbrokerage, setbuyerbrokerage] = useState("0");
+
+
+  useEffect(() => {
+    console.log("Seller brokerage ", sellerbrokerage);
+    console.log("Buyer brokerage value contains ", buyerbrokerage);
+  }, [sellerbrokerage, buyerbrokerage])
+
+  const handleSellerBrokerageInput = (text) => {
+    console.log("Handle seller brokerage ")
+
+    setsellerbrokerage(text);
+
+    setFormState(prevState => {
+
+      const updateedsellerdata = {
+        ...prevState.SellerData,
+        brokerage: parseFloat(text)
+      };
+      const updatedDynamicFields = prevState.dynamicFields.map((dynamicField) => {
+        const bags = dynamicField.Bags || 0;
+        const updatedSellerBrokerage = parseFloat(bags) * parseFloat(text)
+        return {
+          ...dynamicField,
+          sellerbrokerage: updatedSellerBrokerage,
+        };
+      });
+      return {
+        ...prevState,
+        SellerData: updateedsellerdata,
+        dynamicFields: updatedDynamicFields,
+      };
+
+
+    })
+
+  }
+  const handleBuyerBrokerageInput = (text) => {
+   console.log("Handle buyer brokerage");
+   setbuyerbrokerage(text);
+
+   setFormState(prevState=>{
+    const updatebuyerdata={
+      ...prevState?.BuyerData,
+      brokerage:parseFloat(text)
+    };
+    const updateDynamicFields = prevState.dynamicFields.map((dynamicField)=>{
+      const bags=dynamicField.Bags ||0;
+      const updateBuyerBrokerage=parseFloat(bags)*parseFloat(text);
+      return{
+        ...dynamicField,
+        buyerbrokerage:updateBuyerBrokerage,
+      };
+    });
+    return{
+      ...prevState,
+      BuyerData:updatebuyerdata,
+      dynamicFields:updateDynamicFields
+    }
+   })
+  }
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: Colors.statusbar }}>
       <LinearGradient colors={['#f1f7fc', '#e8f2ff', '#cedff5']} style={{ flex: 1, }}>
@@ -527,9 +613,9 @@ console.log(" sauda no ",lastsaudano)
 
           <Text style={[styles.sty5, {}]}>Sauda No:</Text>
           <Text style={styles.sty7}>*</Text>
-        
-          
-          <Text style={{color:'black',marginHorizontal:moderateScale(15)}}>{Sauda}</Text>
+
+
+          <Text style={{ color: 'black', marginHorizontal: moderateScale(15) }}>{Sauda}</Text>
           <TouchableOpacity onPress={showDatePicker} style={{ marginLeft: moderateScale(20) }}>
             <Image
               style={{ width: moderateScale(25), height: moderateScale(25) }}
@@ -594,6 +680,22 @@ console.log(" sauda no ",lastsaudano)
               <Text style={[styles.sty5, {}]}>Mo No :</Text>
               <Text style={styles.sty17}>{selectedSellerData?.mobile}</Text>
             </View>
+            <View style={styles.sty12}>
+              <Text style={styles.sty5}>Brokerage</Text>
+              {/* <Text style={styles.sty7}>*</Text> */}
+              <Text style={[styles.sty5, { marginLeft: 3 }]}>:</Text>
+              {/* <TextInput
+                    style={styles.sty15}
+                    onChangeText={(text) => handleFieldChange('Weight', text, index)}
+                    value={formState.dynamicFields[index].Weight}
+                  /> */}
+              <TextInput
+                keyboardType='decimal-pad'
+                style={styles.sty15}
+                onChangeText={handleSellerBrokerageInput}
+                value={sellerbrokerage}
+              />
+            </View>
           </View>
 
           {/* Buyer container  */}
@@ -646,7 +748,22 @@ console.log(" sauda no ",lastsaudano)
             </View>
             {/* <Text style={[styles.sty5, { marginTop: moderateScale(10) }]}>Mo No :</Text> */}
 
-
+            <View style={styles.sty12}>
+              <Text style={styles.sty5}>Brokerage</Text>
+              {/* <Text style={styles.sty7}>*</Text> */}
+              <Text style={[styles.sty5, { marginLeft: 3 }]}>:</Text>
+              {/* <TextInput
+                    style={styles.sty15}
+                    onChangeText={(text) => handleFieldChange('Weight', text, index)}
+                    value={formState.dynamicFields[index].Weight}
+                  /> */}
+              <TextInput
+                keyboardType='decimal-pad'
+                style={styles.sty15}
+                onChangeText={handleBuyerBrokerageInput}
+                value={buyerbrokerage}
+              />
+            </View>
           </View>
 
           {/* other common thing  */}
@@ -696,7 +813,7 @@ console.log(" sauda no ",lastsaudano)
                   <Text style={[styles.sty5, { marginLeft: 3 }]}>:</Text>
                   <TextInput
                     style={styles.sty15}
-                    onChangeText={(text) => handleFieldChange('Weight', text, index)}
+                    onChangeText={(text) => handleFieldWeightChange('Weight', text, index)}
                     value={formState.dynamicFields[index].Weight}
                   />
                 </View>
@@ -707,7 +824,7 @@ console.log(" sauda no ",lastsaudano)
                   <Text style={[styles.sty5, { marginLeft: 3 }]}>:</Text>
                   <TextInput
                     style={[styles.sty15, { marginLeft: moderateScale(15), justifyContent: 'center', alignItems: 'center' }]}
-                    onChangeText={(text) => handleFieldChange('Bags', text, index)}
+                    onChangeText={(text) => handleFieldBagChange('Bags', text, index)}
                     value={formState.dynamicFields[index].Bags}
                   />
                 </View>
@@ -771,7 +888,7 @@ console.log(" sauda no ",lastsaudano)
 
             </TouchableOpacity>
           </View>
-         
+
         </ScrollView>
 
       </LinearGradient>

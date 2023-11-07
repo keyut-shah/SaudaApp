@@ -68,7 +68,31 @@ export default UpdateScreen = ({ route, navigation }) => {
     const [selectedBardan, setSelectedBardan] = useState(null);
     const [selectItemType, setSelectItemType] = useState(null);
 
+    const [sellerInputbrokerage, setsellerInputbrokerage] = useState(statementdata?.SellerData?.brokerage.toString());
+    const [buyerInputbrokerage, setbuyerInputbrokerage] = useState(statementdata?.BuyerData?.brokerage.toString());
 
+    const [sellertotalbrokerage, setsellertotalbrokerage] = useState(statementdata?.sellerbrokerage);
+    const [buyertotalbrokerage, setbuyertotalbrokerage] = useState(statementdata?.buyerbrokerage);
+
+    const [myquantity, setquanity] = useState(statementdata?.quantity);
+
+    useEffect(() => {
+        const myquantity = parseFloat(Weight) * parseFloat(Bags);
+        console.log("My quantity value is ", myquantity);
+        setquanity(myquantity);
+    }, [Weight, Bags])
+    useEffect(() => {
+        console.log("on change in selected seller ", selectedSellerData);
+        const brokerageofseller = parseFloat(Bags) * parseFloat(selectedSellerData?.brokerage);
+        console.log("My total seller brokerage value when seller change the value is ", brokerageofseller);
+        setsellertotalbrokerage(brokerageofseller.toString());
+    }, [selectedSellerData])
+    useEffect(() => {
+        console.log("on change in selected buyer ", selectedBuyerData);
+        const brokerageofbuyer = parseFloat(Bags) * parseFloat(selectedBuyerData?.brokerage);
+        console.log("My total buyer brokerage value when buyer change the value is ", brokerageofbuyer);
+        setbuyertotalbrokerage(brokerageofbuyer.toString());
+    }, [selectedBuyerData]);
     useEffect(() => {
         console.log("Selected Bardan", selectedBardan);
     }, [selectedBardan])
@@ -88,6 +112,11 @@ export default UpdateScreen = ({ route, navigation }) => {
         console.log("My Selected Date ", mySelectedDate);
 
     }, [mySelectedDate]);
+    useEffect(() => {
+        console.log("sauda detail for this particular data is ", saudadetail)
+    }, [saudadetail])
+
+
     const showDatePicker = () => {
         setDatePickerVisibility(true);
     };
@@ -102,21 +131,6 @@ export default UpdateScreen = ({ route, navigation }) => {
         hideDatePicker();
     };
 
-
-
-    function generateUniqueId() {
-        // Create a timestamp as a base for the ID (you can adjust the format)
-        const timestamp = new Date().getTime();
-
-        // Create a random number (you can replace this with your own logic)
-        const randomNum = Math.floor(Math.random() * 1000);
-
-        // Combine the timestamp and random number to create the ID
-        const uniqueId = `${timestamp}${randomNum}`;
-
-        return uniqueId;
-    }
-   
     const addDataansShareData = () => {
         // validation check
         console.log("Seller name contians ", query);
@@ -140,7 +154,7 @@ export default UpdateScreen = ({ route, navigation }) => {
         console.log("SELECTED DATE ==>", mySelectedDate);
         const convertdate = moment(mySelectedDate, "DD/MM/YYYY").format();
         console.log("converted date contains", convertdate);
-        
+
         const saudainfo = {
             Bags: Bags,
             BuyerData: selectedBuyerData,
@@ -158,65 +172,25 @@ export default UpdateScreen = ({ route, navigation }) => {
         console.log("My sauda infon coantins==> ", saudainfo)
         console.log("custom id contians ", customid);
 
-
-        // try {
-        //     usersCollection.doc(customID).set(saudainfo).then(docRef => {
-
-        //         console.log("Data added doc ref conatins  ", docRef)
-        //         Snackbar.show({
-        //             text: 'Data Added Successfully ',
-        //             duration: Snackbar.LENGTH_SHORT,
-        //             backgroundColor: 'green',
-        //             textColor: 'white',
-        //         });
-        //         onChangeSellerName('');
-        //         onChangeBuyerName('');
-        //         onChangeRate('');
-        //         onChangeWeight('');
-        //         onChangeSauda('');
-        //         onChangeBags('')
-        //         onChangePayment('')
-        //         onChangeNotes('')
-        //         onChangePayment('')
-        //         setQuery('');
-        //         setbuyerquery('');
-        //         setSelectedSellerData('');
-        //         setSelectedBuyerData('');
-
-        //     })
-
-        // } catch (error) {
-
-
-
-        //     Snackbar.show({
-        //         text: 'Something Went Wrong Please try again',
-        //         duration: Snackbar.LENGTH_SHORT,
-        //         backgroundColor: 'red',
-        //         textColor: 'white',
-        //     });
-        //     console.error('Error adding data to Firestore: ', error);
-        // }
-
-
-
-
         try {
 
             statementCollection.doc(customid).update({
                 Bags: Bags,
-                Bardan:selectedBardan,
+                Bardan: selectedBardan,
                 BuyerData: selectedBuyerData,
-                Item:selectItemType,
+                Item: selectItemType,
                 Notes: Notes,
                 Payment: Payment,
                 Rate: Rate,
                 SellerData: selectedSellerData,
                 Weight: Weight,
+                buyerbrokerage: buyertotalbrokerage,
                 date: convertdate,
+                quantity: myquantity,
                 sauda_no: saudano,
+                sellerbrokerage: sellertotalbrokerage,
                 unique_id: customid,
-                
+
 
             }).then(() => {
                 console.log('Data updated successfully');
@@ -278,15 +252,19 @@ export default UpdateScreen = ({ route, navigation }) => {
             .map((item) => item.companyname);
 
         console.log("My filtered contains ", filtered);
+
         setFilteredData(filtered);
     };
     const handleItemSelect = (selectedValue) => {
         console.log("On select the item from the dropdown ", selectedValue);
         const selectedSeller = data.find((item) => item.companyname === selectedValue);
         console.log("Selected Seller object contains ", selectedSeller)
+
         setSelectedSellerData(selectedSeller);
+
         setSellerCity(selectedSeller?.city);
         setSellerMoNo(selectedSeller?.mobile);
+        setsellerInputbrokerage(selectedSeller?.brokerage);
         setQuery(selectedValue);
         sethidingsellerdropdown(true);
         if (autocompletesellerRef.current) {
@@ -350,21 +328,6 @@ export default UpdateScreen = ({ route, navigation }) => {
         setbuyerfilterdata(filtered);
     }
 
-
-    function CustomTextInput(props) {
-        return (
-            <TextInput
-                {...props}
-                style={{
-                    color: 'black',
-
-                }}
-            />
-        );
-    }
-
-
-
     const handleModalDelete = () => {
         // Perform the delete logic here
         console.log("handle delete method call")
@@ -407,11 +370,20 @@ export default UpdateScreen = ({ route, navigation }) => {
         setSelectedSellerData(statementdata?.SellerData);
         setScreenEditable(true);
     }
-
-    useEffect(() => {
-        console.log("sauda detail for this particular data is ", saudadetail)
-    }, [saudadetail])
-
+    const handlesellerbrokeragechange = (brokerageval) => {
+        console.log("brokerage val contains ", brokerageval);
+        setsellerInputbrokerage(brokerageval.toString());
+        const totalsellerbrokerage = parseFloat(Bags) * parseFloat(brokerageval);
+        console.log("total seller brokerage when user change seller brokerage ", totalsellerbrokerage);
+        setsellertotalbrokerage(totalsellerbrokerage);
+    }
+    const handlebuyerbrokeragechange = (brokerageval) => {
+        console.log("brokerage val contains in buyer ", brokerageval);
+        setbuyerInputbrokerage(brokerageval.toString());
+        const totalbuyerbrokerage = parseFloat(Bags) * parseFloat(brokerageval);
+        console.log("total buyer brokerage when user change the buyer brokerage  ", totalbuyerbrokerage);
+        setbuyertotalbrokerage(totalbuyerbrokerage);
+    }
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: Colors.statusbar }}>
@@ -532,6 +504,20 @@ export default UpdateScreen = ({ route, navigation }) => {
                                     )
                             }
                         </View>
+                        <View style={[styles.sty6, { marginTop: moderateScale(10), alignItems: 'center' }]}>
+                            <Text style={[styles.sty5, {}]}>Brokerage :</Text>
+                            {
+                                ScreenEditable ? (
+                                    <TextInput
+                                        value={sellerInputbrokerage}
+                                        onChangeText={handlesellerbrokeragechange}
+                                        style={[styles.sty15, { marginLeft: moderateScale(20) }]} />
+                                ) :
+                                    (
+                                        <Text style={styles.sty17}>{statementdata?.SellerData?.brokerage}</Text>
+                                    )
+                            }
+                        </View>
                     </View>
 
                     {/* Buyer container  */}
@@ -608,7 +594,20 @@ export default UpdateScreen = ({ route, navigation }) => {
 
                         </View>
 
-
+                        <View style={[styles.sty6, { marginTop: moderateScale(10), alignItems: 'center' }]}>
+                            <Text style={[styles.sty5, {}]}>Brokerage :</Text>
+                            {
+                                ScreenEditable ? (
+                                    <TextInput
+                                        value={buyerInputbrokerage}
+                                        onChangeText={handlebuyerbrokeragechange}
+                                        style={[styles.sty15, { marginLeft: moderateScale(20) }]} />
+                                ) :
+                                    (
+                                        <Text style={styles.sty17}>{statementdata?.BuyerData?.brokerage}</Text>
+                                    )
+                            }
+                        </View>
 
                     </View>
 

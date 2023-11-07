@@ -100,6 +100,18 @@ const styles = StyleSheet.create({
 
         borderColor: Colors.databordercolor,
     },
+    city_container:{
+        width: moderateScale(125),
+
+        justifyContent: 'center',
+        alignItems: 'center',
+        flexDirection: 'row',
+        // paddingHorizontal:moderateScale(20),
+        borderWidth: 1,
+        height: moderateScale(50),
+
+        borderColor: Colors.databordercolor,
+    },
     filtercontainer: {
 
         // borderWidth: 1,
