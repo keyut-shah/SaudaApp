@@ -15,6 +15,7 @@ import DropdownComponent from '../../common/BardanDropDown';
 import DeleteConfirmationModal from '../../common/DeleteModal';
 import { Dropdown } from 'react-native-element-dropdown';
 import ItemDropdownComponent from '../../common/ItemDropDown';
+import updateandsharepdf from '../../common/UpdateAndSavePDF';
 export default UpdateScreen = ({ route, navigation }) => {
     const { statementdata } = route.params;
     const [saudadetail, setsaudadetail] = useState(statementdata);
@@ -131,6 +132,31 @@ export default UpdateScreen = ({ route, navigation }) => {
         hideDatePicker();
     };
 
+    const updatedataandshare=()=>{
+        console.log("We are on update and share method");
+        const convertdate = moment(mySelectedDate, "DD/MM/YYYY").format();
+        const saudainfo = {
+            Bags: Bags,
+            Bardan: selectedBardan,
+            BuyerData: selectedBuyerData,
+            Item: selectItemType,
+            Notes: Notes,
+            Payment: Payment,
+            Rate: Rate,
+            SellerData: selectedSellerData,
+            Weight: Weight,
+            buyerbrokerage: parseInt(buyertotalbrokerage),
+            date: convertdate,
+            quantity: parseInt(myquantity),
+            sauda_no: parseInt(Sauda),
+            sellerbrokerage: parseInt(sellertotalbrokerage),
+            unique_id: customid,
+
+
+        }
+        console.log("My sauda info contains in update screen is ",saudainfo);
+        updateandsharepdf(saudainfo);
+    }
     const addDataansShareData = () => {
         // validation check
         console.log("Seller name contians ", query);
@@ -804,6 +830,12 @@ export default UpdateScreen = ({ route, navigation }) => {
                                         onPress={addDataansShareData}
                                     >
                                         <Text style={styles.SaveText}>Update</Text>
+
+                                    </TouchableOpacity>
+                                    <TouchableOpacity style={styles.SaveContainer}
+                                        onPress={updatedataandshare}
+                                    >
+                                        <Text style={styles.SaveText}>Update and Share </Text>
 
                                     </TouchableOpacity>
                                 </View>

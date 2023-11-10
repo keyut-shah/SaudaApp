@@ -30,12 +30,12 @@ export default WorkScreen = ({ navigation }) => {
             >
                 <Text style={styles.datatext}>Create Item Bardan</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.datacontainer}
+            {/* <TouchableOpacity style={styles.datacontainer}
                 activeOpacity={0.5}
                 onPress={() => navigation.navigate('DynamicForm')}
             >
                 <Text style={styles.datatext}>Create Item Bardan</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
         </View>
     )
 }

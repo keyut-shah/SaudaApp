@@ -13,7 +13,8 @@ import BottomSheet, {
     BottomSheetBackdrop
 } from '@gorhom/bottom-sheet';
 import DateTimePicker, { DateTimePickerModal } from 'react-native-modal-datetime-picker';
-
+import Snackbar from 'react-native-snackbar';
+import statementandsharepdf from '../../common/StatementPDF';
 
 
 
@@ -22,9 +23,10 @@ export default StatementScreen = ({ navigation }) => {
     const [lastDocument, setLastDocument] = useState(null);
     const [refreshing, setRefreshing] = useState(false);
     const [reachedEnd, setReachedEnd] = useState(false);
-    // 0 =date,1 = name , 2=sauda number , 3 = city
-    const [selectedOption, setSelectedOption] = useState('1');
+    // 0 =date,1 = name , 2=sauda number , 3 = city 4=defaule search
+    const [selectedOption, setSelectedOption] = useState('4');
     const [searchtext, setsearchtext] = useState('');
+
     const filterBottomSheetRef = useRef(null);
 
     const pageSize = 10;
@@ -34,54 +36,67 @@ export default StatementScreen = ({ navigation }) => {
         // fetch again 
         setRefreshing(false);
 
+        setSelectedOption('4');
         fetchstatementfirsttime();
     };
 
     useEffect(() => {
         console.log("Last document value ", lastDocument);
     }, [lastDocument])
-    useEffect(()=>{
-        console.log("selected option for the search text ",selectedOption);
-    },[selectedOption])
+    useEffect(() => {
+        console.log("selected option for the search text ", selectedOption);
+    }, [selectedOption])
+
     const fetchNextPage = async () => {
+
+        console.log("My selected option while fetching next page with the help of flatlist is ", selectedOption)
         console.log("Fetch nextpage method is call");
-        let statementRef = firestore()
-            .collection('statement')
-            .orderBy('sauda_no', 'desc')
-            .limit(pageSize);
+        if (selectedOption == '4' || searchtext=='') {
+            let statementRef = firestore()
+                .collection('statement')
+                .orderBy('sauda_no', 'desc')
+                .limit(pageSize);
 
-        if (lastDocument) {
-            console.log("Does it goes in the if part for checking in last document ");
-            statementRef = statementRef.startAfter(lastDocument);
+            if (lastDocument) {
+                console.log("Does it goes in the if part for checking in last document ");
+                statementRef = statementRef.startAfter(lastDocument);
+            }
+
+            try {
+                const querySnapshot = await statementRef.get();
+                const newStatementData = querySnapshot.docs.map((doc) => doc.data());
+                console.log("New Statement Data contians in fetch nextpage try method ");
+                setstatementdata((prevData) => [...prevData, ...newStatementData]);
+
+                if (querySnapshot.docs.length > 0) {
+                    console.log("Does my query snapshot length >0 ");
+                    console.log("Query snapshot value contains ", querySnapshot.docs);
+                    const newLastDocument = querySnapshot.docs[querySnapshot.docs.length - 1];
+                    setLastDocument(newLastDocument);
+                }
+                if (querySnapshot.docs.length === 0) {
+                    setReachedEnd(true); // No more data to fetch
+                }
+            } catch (error) {
+                console.error('Error fetching statement data:', error);
+            }
         }
+        else if (selectedOption == '1' || selectedOption == '2') {
 
-        try {
-            const querySnapshot = await statementRef.get();
-            const newStatementData = querySnapshot.docs.map((doc) => doc.data());
-            console.log("New Statement Data contians in fetch nextpage try method ");
-            setstatementdata((prevData) => [...prevData, ...newStatementData]);
+            console.log("My flatlist is fetching next page by calling search by name");
 
-            if (querySnapshot.docs.length > 0) {
-                console.log("Does my query snapshot length >0 ");
-                console.log("Query snapshot value contains ", querySnapshot.docs);
-                const newLastDocument = querySnapshot.docs[querySnapshot.docs.length - 1];
-                setLastDocument(newLastDocument);
-            }
-            if (querySnapshot.docs.length === 0) {
-                setReachedEnd(true); // No more data to fetch
-            }
-        } catch (error) {
-            console.error('Error fetching statement data:', error);
         }
     };
 
     function fetchstatementfirsttime() {
+        // setSelectedOption('4')
+        setReachedEnd(false);
         console.log("i call fetchstatement first time method ");
         const statementRef = firestore()
             .collection('statement')
-            // .orderBy('date', 'desc')
-            .orderBy('sauda_no', 'desc')
-            .limit(pageSize);
+            .orderBy('date', 'desc')
+            // .orderBy('sauda_no', 'desc')
+            
         const unsubscribe = statementRef.onSnapshot((querySnapshot) => {
             const newStatementData = querySnapshot.docs.map((doc) => doc.data());
             // console.log("new statement is added to statement data ", newStatementData);
@@ -95,7 +110,7 @@ export default StatementScreen = ({ navigation }) => {
                 setLastDocument(newLastDocument);
             }
             if (querySnapshot.docs.length === 0) {
-                setReachedEnd(true); // No more data to fetch
+                // setReachedEnd(true); // No more data to fetch
             }
         });
 
@@ -105,13 +120,20 @@ export default StatementScreen = ({ navigation }) => {
         fetchstatementfirsttime();
     }, []);
 
-
+useEffect(()=>{
+if(searchtext=='' )
+{
+    setLastDocument('');
+    fetchstatementfirsttime();
+}
+},[searchtext])
     async function fetchStatementbyName(searchtext) {
-
+        setLastDocument('');
         console.log("Querying for ", searchtext);
         if (!searchtext.trim()) {
             console.log("does we are redirect to the fetchfirst time method because our search text =0")
-            setLastDocument('');
+
+
             fetchstatementfirsttime();
         }
         else {
@@ -138,43 +160,154 @@ export default StatementScreen = ({ navigation }) => {
                 console.log("Seller Data contains ", sellerData);
                 const combineData = [...buyerData, ...sellerData].sort((a, b) => a.sauda_no - b.sauda_no);
                 setstatementdata(combineData);
+                if(combineData.length>0)
+                {
+                setReachedEnd(true);
+                }
                 // Rest of your code to process the snapshots
             } catch (error) {
-                console.error('Error fetching statement data:', error);
+                Snackbar.show({
+                    text: 'Error while fetching the data please try again',
+                    duration: Snackbar.LENGTH_SHORT,
+                    backgroundColor: 'red',
+                    textColor: 'white',
+                });
+                // console.error('Error fetching statement data:', error);
             }
         }
+        // end of the else 
 
     }
 
-    async function fetchStatementbyNumber(searchtext){
-        console.log("My search sauda no in search bar for number  ",searchtext);
+    async function fetchStatementbyNumber(searchtext) {
+        setLastDocument('');
+        console.log("My search sauda no in search bar for number  ", searchtext);
+        // console.log("type of search text is ",typeof(searchtext));
         if (!searchtext.trim()) {
             console.log("does we are redirect to the fetchfirst time method because our search text =0")
             setLastDocument('');
             fetchstatementfirsttime();
         }
-        else{
+        else {
             console.log("does it gone in else part for the fetchstatement by number ");
             const statementCollection = firestore().collection('statement');
             try {
-            const numberSnapshot = Snapshot=await statementCollection
-            .where('sauda_no'==parseInt(searchtext))
-            .orderBy('sauda_no','asc')
-            .get();
-                console.log("so whats going wrong dont knwo but show filepath must be a string or instance of filepaty ")
-            const saudaData=numberSnapshot.docs.map((doc)=>doc.data());
-            console.log("sauda data contains wher match is ",saudaData);
-            setstatementdata(saudaData);
+                const numberSnapshot = await statementCollection
+                    .where('sauda_no', '==', parseInt(searchtext))
+                    // .orderBy('sauda_no','asc')
+                    .get();
 
+                const saudaData = numberSnapshot.docs.map((doc) => doc.data());
+                console.log("sauda data contains wher match is ", saudaData);
+                setstatementdata(saudaData);
+                if(saudaData>0)
+                {
+                setReachedEnd(true);
+                }
             }
-            catch(error)
-            {
-                console.log("Error while doing search by number is ",error);
+            catch (error) {
+                console.log("Error while doing search by number is ", error);
             }
         }
     }
+    async function fetchStatementbyCity(searchtext) {
+
+        console.log("search city name is ",searchtext);
+        setLastDocument('');
+        console.log("Querying for ", searchtext);
+        if (!searchtext.trim()) {
+            setLastDocument('');
+            console.log("does we are redirect to the fetchfirst time method because our search text =0")
+            fetchstatementfirsttime();
+        }
+        else {
+            const statementCollection = firestore().collection('statement');
+            try {
+                const buyercitysnapshot = await statementCollection
+                    .where('BuyerData.city', '>=', searchtext)
+                    .where('BuyerData.city', '<=', searchtext + '\uf8ff')
+                    .get();
+                const sellercitysnapshot = await statementCollection
+                    .where('SellerData.city', '>=', searchtext)
+                    .where('SellerData.city', '<=', searchtext  + '\uf8ff')
+                    .get();
+
+                const buyerData = buyercitysnapshot.docs.map((doc) => doc.data());
+                const sellerData = sellercitysnapshot.docs.map((doc) => doc.data());
+
+                const searchData = [...buyerData, ...sellerData];
+
+                const uniqueData = removeDuplicateSaudaNos(searchData);
+                console.log("Number of Unique Documents:", uniqueData.length);
+                const sortedData = uniqueData.sort((a, b) => a.sauda_no - b.sauda_no);
+
+                if(sortedData>0)
+                {
+                    setReachedEnd(true);
+                }
+                setstatementdata(sortedData);
+            }
+            catch (error) {
+                console.log("Some error occurr please try agian ", error);
+                Snackbar.show({
+                    text: 'Error while fetching the data please try again',
+                    duration: Snackbar.LENGTH_SHORT,
+                    backgroundColor: 'red',
+                    textColor: 'white',
+                });
+            }
+        }
+    }
+    function removeDuplicateSaudaNos(data) {
+        console.log("remove duplicate sauda method calls  ",data);
+        const uniqueData = [];
+        const seenSaudaNos = new Set();
+    
+        data.forEach((item) => {
+            const saudaNo = item.sauda_no;
+    
+            if (!seenSaudaNos.has(saudaNo)) {
+                uniqueData.push(item);
+                seenSaudaNos.add(saudaNo);
+            }
+        });
+    
+        return uniqueData;
+    }
+    async function fetchStatementbyDate() {
+        let startDate = new Date(isostartdate);
+        let endDate = new Date(isoenddate);
+
+        // Convert endDate to UTC
+        endDate = new Date(endDate.getTime() - endDate.getTimezoneOffset() * 60000);
+
+        console.log("My start date is ", startDate);
+        console.log("My end date is ", endDate);
+
+        setLastDocument('');
+        const statementCollection = firestore().collection('statement');
+        try {
+            const dateSnapshot = await statementCollection
+                .where('date', '>=', startDate)
+                .where('date', '<=', endDate)
+                .orderBy('date', 'asc')
+                .get();
+
+            const dateData = dateSnapshot.docs.map((doc) => doc.data());
+
+            setstatementdata(dateData);
+        }
+        catch (error) {
+            Snackbar.show({
+                text: 'Error while fetching the data please try again',
+                duration: Snackbar.LENGTH_SHORT,
+                backgroundColor: 'red',
+                textColor: 'white',
+            });
+        }
+    }
     useEffect(() => {
-        // console.log("Statement data value in useEffect ", statementdata);
+        console.log("Statement data value in useEffect ", statementdata);
 
     }, [statementdata])
 
@@ -253,36 +386,46 @@ export default StatementScreen = ({ navigation }) => {
         );
     }
 
-    const handlefilterbtn = () => {
-        filterBottomSheetRef.current.expand();
-        console.log("user click on filter button ")
-    }
     const handlesearchtext = (text) => {
+        setReachedEnd(false);
         console.log("on change text value method call ", text);
         setsearchtext(text);
-        if(selectedOption=='0')
-        {
+        
+        if (selectedOption == '0') {
             // search by date
+            // fetchStatementbyDate();
             console.log("search by date");
         }
-        else if(selectedOption=='1')
-        {
+        else if (selectedOption == '1') {
             console.log("does it goes to the select option by name ");
             fetchStatementbyName(text);
         }
-        else   if(selectedOption=='2'){
+        else if (selectedOption == '2') {
             console.log("does it goes to select option by number ");
-            console.log("Also it goes in else part so my search text is ",searchtext);
+            console.log("Also it goes in else part so my search text is ", searchtext);
             fetchStatementbyNumber(text);
         }
-        else  if(selectedOption=='3'){
+        else if (selectedOption == '3') {
+            fetchStatementbyCity(text);
             console.log("fetch by city ")
         }
-        else{
-            // default if any thing gone wrong 
-            console.log("this is calling first time method as something went wrong so default case")
-            fetchstatementfirsttime();
+        else {
+            Snackbar.show({
+                text: 'Please Select type from Filter ',
+                duration: Snackbar.LENGTH_SHORT,
+                backgroundColor: 'red',
+                textColor: 'white',
+            });
         }
+        // else if(selectedOption=='4')
+        // {
+        //     fetchstatementfirsttime();
+        // }
+        // else{
+        //     // default if any thing gone wrong 
+        //     console.log("this is calling first time method as something went wrong so default case")
+        //     fetchstatementfirsttime();
+        // }
     }
     useEffect(() => {
         console.log("search text contains ", searchtext);
@@ -295,6 +438,7 @@ export default StatementScreen = ({ navigation }) => {
     // callbacks
     const handlePresentModalPress = useCallback(() => {
         filterbottomSheetModalRef.current?.present();
+        setsearchtext('');
     }, []);
     const handleSheetChanges = useCallback((index) => {
         console.log('handleSheetChanges', index);
@@ -313,12 +457,17 @@ export default StatementScreen = ({ navigation }) => {
         []
     );
 
-
+useEffect(()=>{
+    console.log("My reach end value is ",reachedEnd);
+},[reachedEnd])
     const handleOptionSelect = (option) => {
         setSelectedOption(option);
     };
 
-
+const handleprint=()=>{
+    console.log("Print the report ");
+    statementandsharepdf(statementdata,searchtext);
+}
 
     // for date modal
     const [mySelectedStartDate, setSelectedStartDate] = useState(moment(new Date()).format('DD/MM/YYYY'));
@@ -373,6 +522,7 @@ export default StatementScreen = ({ navigation }) => {
 
             setisoenddate(isoStartDate);
             setiosstartdate(isoEndDate);
+            // fetchStatementbyDate();
             // setFormState({ ...formState, date: isodate });
         }
         else {
@@ -415,7 +565,7 @@ export default StatementScreen = ({ navigation }) => {
             <ScrollView style={styles.scrollcontainer}
                 horizontal
             >
-                <View style={{ flexDirection: 'column', }}>
+                <View style={{ flexDirection: 'column',}}>
                     <View style={{ flexDirection: 'row', marginBottom: moderateScale(20) }}>
                         <View style={styles.number_container}>
                             <Text style={[styles.headertext, { marginHorizontal: 0 }]}>No</Text>
@@ -446,9 +596,10 @@ export default StatementScreen = ({ navigation }) => {
                             <Text style={styles.headertext}>Bardan</Text>
                         </View> */}
                     </View>
+                    {statementdata.length > 0 ? (
                     <FlatList
                         // onEndReached={fetchNextPage}
-                        onEndReachedThreshold={0.7}
+                        // onEndReachedThreshold={0.7}
                         data={statementdata}
                         keyExtractor={(item, index) => index.toString()}
                         renderItem={({ item }) => <DataRow data={item}
@@ -457,7 +608,13 @@ export default StatementScreen = ({ navigation }) => {
                         onRefresh={onRefresh}
                         refreshing={refreshing}
                     />
-
+                    ):
+                    (
+                        <Text style={{  fontSize: 16,
+                            color: 'gray',
+                            }}>No Data Available</Text>
+                    )
+                        }
                     {/* <BottomSheet ref={filterBottomSheetRef} index={1} snapPoints={['1%', '40%']}>
                             <View style={{
                                 flex: 1,
@@ -472,10 +629,16 @@ export default StatementScreen = ({ navigation }) => {
                 
             </View> */}
             </ScrollView>
-            <View style={{ alignItems: 'center' }}>
+             <View style={{ alignItems: 'center' ,flexDirection:'row',justifyContent:'space-around'}}>
                 {/* Your data rendering logic here */}
                 {reachedEnd && <Text style={{ color: 'black', }}>Reach End of the Data</Text>}
+                { reachedEnd && <TouchableOpacity onPress={handleprint} activeOpacity={0.4}
+                    style={styles.printpdf}
+                >
+                    <Text>Print the Sauda</Text>
+                    </TouchableOpacity>}
             </View>
+           
 
             {/* Filter Modal */}
             <BottomSheetModal
@@ -497,7 +660,7 @@ export default StatementScreen = ({ navigation }) => {
 
                 <View style={styles.bottomsheetmaincontainer}>
 
-                    <TouchableOpacity
+                    {/* <TouchableOpacity
                         onPress={() => {
                             handleOptionSelect('0')
                             filterbottomSheetModalRef.current.dismiss();
@@ -512,9 +675,13 @@ export default StatementScreen = ({ navigation }) => {
                         }}
                     >
                         <Text style={styles.bottomtext}>By Date</Text>
-                    </TouchableOpacity>
+                    </TouchableOpacity> */}
                     <TouchableOpacity
-                        onPress={() => handleOptionSelect('1')}
+                        onPress={() => {
+                            handleOptionSelect('1')
+                            filterbottomSheetModalRef.current.dismiss();
+                        }
+                        }
                         style={{
                             backgroundColor: selectedOption === '1' ? 'lightgray' : 'transparent',
                             flex: 1,
@@ -526,7 +693,10 @@ export default StatementScreen = ({ navigation }) => {
                     </TouchableOpacity>
 
                     <TouchableOpacity
-                        onPress={() => handleOptionSelect('2')}
+                        onPress={() => {
+                            handleOptionSelect('2')
+                            filterbottomSheetModalRef.current.dismiss();
+                        }}
                         style={{
                             backgroundColor: selectedOption === '2' ? 'lightgray' : 'transparent',
                             flex: 1,
@@ -538,7 +708,11 @@ export default StatementScreen = ({ navigation }) => {
                     </TouchableOpacity>
 
                     <TouchableOpacity
-                        onPress={() => handleOptionSelect('3')}
+                        onPress={() => {
+                            handleOptionSelect('3')
+                            filterbottomSheetModalRef.current.dismiss();
+                        }
+                        }
                         style={{
                             backgroundColor: selectedOption === '3' ? 'lightgray' : 'transparent',
                             flex: 1,

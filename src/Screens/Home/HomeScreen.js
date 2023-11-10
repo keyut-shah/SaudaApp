@@ -16,7 +16,10 @@ import CustomDropdown from '../../common/BardanDropDown';
 import DropdownComponent from '../../common/BardanDropDown';
 import ItemDropdownComponent from '../../common/ItemDropDown';
 
-
+import { Platform, PermissionsAndroid, } from "react-native";
+import RNHTMLtoPDF from 'react-native-html-to-pdf';
+import RNFS from 'react-native-fs';
+import createPDF from '../../common/CreateAndSavePDF';
 
 export default HomeScreen = ({ navigation }) => {
   const [SellerName, onChangeSellerName] = useState('');
@@ -31,6 +34,10 @@ export default HomeScreen = ({ navigation }) => {
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
 
 
+  const generatepdf=()=>{
+    saveDataToFirestore();
+    createPDF(formState);
+  }
   const showDatePicker = () => {
     setDatePickerVisibility(true);
   };
@@ -352,13 +359,13 @@ export default HomeScreen = ({ navigation }) => {
   };
   const handleFieldBagChange = (fieldName, text, index) => {
     const { BuyerData, SellerData, date, dynamicFields } = formState;
-    
+
     setFormState((prevState) => {
       // Update the Bags field for the specific object
       const updatedField = [...prevState.dynamicFields];
       updatedField[index][fieldName] = text;
       const weight = parseFloat(updatedField[index].Weight)
-      const updatedQuantity=weight*parseFloat(text);
+      const updatedQuantity = weight * parseFloat(text);
       console.log("My quantity value is ", updatedQuantity);
       // Calculate the updated sellerbrokerage for the specific object
       const updatedSellerBrokerage = parseFloat(text) * SellerData?.brokerage;
@@ -376,18 +383,18 @@ export default HomeScreen = ({ navigation }) => {
     });
 
   }
-  const handleFieldWeightChange=(fieldName,text,index)=>{
-    setFormState((prevState)=>{
+  const handleFieldWeightChange = (fieldName, text, index) => {
+    setFormState((prevState) => {
       const updatedField = [...prevState.dynamicFields];
       updatedField[index][fieldName] = text;
-      const bags=parseFloat(updatedField[index].Bags);
-      const updatedQuantity=bags*parseFloat(text);
-      console.log("My updated quantity is ",updatedQuantity);
+      const bags = parseFloat(updatedField[index].Bags);
+      const updatedQuantity = bags * parseFloat(text);
+      console.log("My updated quantity is ", updatedQuantity);
       updatedField[index].quantity = updatedQuantity;
 
-      return{
+      return {
         ...prevState,
-        dynamicFields:updatedField,
+        dynamicFields: updatedField,
       }
     })
   }
@@ -465,8 +472,8 @@ export default HomeScreen = ({ navigation }) => {
         Rate: '',
         Weight: '',
         Bags: '',
-        Bardan: '',
-        Item: '',
+        Bardan: 'Sabardan',
+        Item: 'CottonCake',
         Payment: '',
         Notes: '',
         sauda_no: uniquenumber,
@@ -476,6 +483,8 @@ export default HomeScreen = ({ navigation }) => {
         buyerbrokerage: '',
       },]
     })
+    setsellerbrokerage('');
+    setbuyerbrokerage('');
   }
   const saveDataToFirestore = async () => {
     const dataToSave = { ...formState };
@@ -505,8 +514,8 @@ export default HomeScreen = ({ navigation }) => {
 
     dynamicFields.forEach(async (fieldSet) => {
       const uniqueid = fieldSet?.unique_id;
-      console.log("Fieldset value contains ",fieldSet);
-      console.log("Unique id contains ====>>>",uniqueid);
+      console.log("Fieldset value contains ", fieldSet);
+      console.log("Unique id contains ====>>>", uniqueid);
       const dataToSave = {
         BuyerData,
         SellerData,
@@ -579,29 +588,35 @@ export default HomeScreen = ({ navigation }) => {
 
   }
   const handleBuyerBrokerageInput = (text) => {
-   console.log("Handle buyer brokerage");
-   setbuyerbrokerage(text);
+    console.log("Handle buyer brokerage");
+    setbuyerbrokerage(text);
 
-   setFormState(prevState=>{
-    const updatebuyerdata={
-      ...prevState?.BuyerData,
-      brokerage:parseFloat(text)
-    };
-    const updateDynamicFields = prevState.dynamicFields.map((dynamicField)=>{
-      const bags=dynamicField.Bags ||0;
-      const updateBuyerBrokerage=parseFloat(bags)*parseFloat(text);
-      return{
-        ...dynamicField,
-        buyerbrokerage:updateBuyerBrokerage,
+    setFormState(prevState => {
+      const updatebuyerdata = {
+        ...prevState?.BuyerData,
+        brokerage: parseFloat(text)
       };
-    });
-    return{
-      ...prevState,
-      BuyerData:updatebuyerdata,
-      dynamicFields:updateDynamicFields
-    }
-   })
+      const updateDynamicFields = prevState.dynamicFields.map((dynamicField) => {
+        const bags = dynamicField.Bags || 0;
+        const updateBuyerBrokerage = parseFloat(bags) * parseFloat(text);
+        return {
+          ...dynamicField,
+          buyerbrokerage: updateBuyerBrokerage,
+        };
+      });
+      return {
+        ...prevState,
+        BuyerData: updatebuyerdata,
+        dynamicFields: updateDynamicFields
+      }
+    })
   }
+  
+  const resetDropdown = () => {
+    setSelectedValue(null);
+    onChange(null);
+  };
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: Colors.statusbar }}>
       <LinearGradient colors={['#f1f7fc', '#e8f2ff', '#cedff5']} style={{ flex: 1, }}>
@@ -837,6 +852,8 @@ export default HomeScreen = ({ navigation }) => {
                     onChange={(item) => {
                       handleFieldChange('Bardan', item?.label, index);
                     }}
+                    onBlur={resetDropdown}
+
                   />
                 </View>
 
@@ -885,6 +902,14 @@ export default HomeScreen = ({ navigation }) => {
               onPress={saveDataToFirestore}
             >
               <Text style={styles.SaveText}>Save</Text>
+
+            </TouchableOpacity>
+          </View>
+          <View style={styles.bottomview}>
+            <TouchableOpacity style={styles.SaveContainer}
+              onPress={generatepdf}
+            >
+              <Text style={styles.SaveText}>Save and Share</Text>
 
             </TouchableOpacity>
           </View>

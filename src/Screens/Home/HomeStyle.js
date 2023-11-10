@@ -127,7 +127,7 @@ const styles = StyleSheet.create({
         // paddingHorizontal:moderateScale(100),
         borderRadius: moderateScale(10),
         backgroundColor: Colors.primary,
-        width: moderateScale(80),
+        // width: moderateScale(80),
         justifyContent: 'center',
         alignItems: 'center'
     },

@@ -100,7 +100,7 @@ const styles = StyleSheet.create({
 
         borderColor: Colors.databordercolor,
     },
-    city_container:{
+    city_container: {
         width: moderateScale(125),
 
         justifyContent: 'center',
@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
     filtercontainer: {
 
         // borderWidth: 1,
-        
+
         margin: moderateScale(10),
         flexDirection: 'row',
         padding: moderateScale(5),
@@ -132,7 +132,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: moderateScale(7),
         marginLeft: moderateScale(10),
         color: 'black',
-        borderRadius:moderateScale(5)
+        borderRadius: moderateScale(5)
     },
     filterbutton: {
         flexDirection: 'row',
@@ -140,44 +140,53 @@ const styles = StyleSheet.create({
         paddingHorizontal: moderateScale(5),
         marginHorizontal: moderateScale(5),
         borderWidth: 1,
-        borderRadius:moderateScale(10),
-        backgroundColor:'white',
-        paddingVertical:moderateScale(5)
+        borderRadius: moderateScale(10),
+        backgroundColor: 'white',
+        paddingVertical: moderateScale(5)
     },
     filtertext: {
         color: 'black',
         marginHorizontal: moderateScale(4),
-        
+
     },
-    searchiconimage:{
+    searchiconimage: {
         width: moderateScale(23), height: moderateScale(23), marginTop: moderateScale(5),
     },
-    filtericonimage:{
-        width: moderateScale(23), height: moderateScale(23), marginTop: moderateScale(5),   
+    filtericonimage: {
+        width: moderateScale(23), height: moderateScale(23), marginTop: moderateScale(5),
     },
-    bottomsheetmaincontainer:{
-        flex:1,
-        borderwidth:1,
+    bottomsheetmaincontainer: {
+        flex: 1,
+        borderwidth: 1,
 
     },
-    bottomtext:{
-        color:'black'
+    bottomtext: {
+        color: 'black'
     },
-    touchablecontainer:{
-        alignItems:'center',
-        flex:1,
-        justifyContent:'space-around'
+    touchablecontainer: {
+        alignItems: 'center',
+        flex: 1,
+        justifyContent: 'space-around'
     },
-    filterbottomsheet:{
-        marginHorizontal:moderateScale(20),
-      
-        padding:moderateScale(5)
+    filterbottomsheet: {
+        marginHorizontal: moderateScale(20),
+
+        padding: moderateScale(5)
 
     },
-    datebottomsheetcontainer:{
-paddingTop:moderateScale(20),
-alignItems:'center',
-flex:1,
+    datebottomsheetcontainer: {
+        paddingTop: moderateScale(20),
+        alignItems: 'center',
+        flex: 1,
+    },
+    printpdf: {
+        padding: 20,
+        // paddingHorizontal:moderateScale(100),
+        borderRadius: moderateScale(10),
+        backgroundColor: Colors.primary,
+        // width: moderateScale(80),
+        justifyContent: 'center',
+        alignItems: 'center'
     }
 
 })
