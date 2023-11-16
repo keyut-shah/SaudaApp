@@ -166,8 +166,8 @@ let totalBrokerage = 0;
 
             const Type=   
             partyName === item.BuyerData?.companyname
-             ?'Sell'
-             :'Buy';
+             ?'Buy'
+             :'Sell';
 
          const currenttotalbrokerage=PartyName?.brokerage*parseInt(item.Bags) ;
     totalQuantity += item.quantity;

@@ -243,7 +243,7 @@ function CreateScreen({ navigation }) {
 
         firestore()
             .collection('users')
-            // .where('companyname', '==', selectedtradervalue?.companyname)
+            .where('companyname', '==', selectedtradervalue?.companyname)
             .doc(uniqueid)
             .get()
             .then((querySnapshot) => {

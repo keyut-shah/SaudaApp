@@ -51,7 +51,7 @@ export default StatementScreen = ({ navigation }) => {
 
         console.log("My selected option while fetching next page with the help of flatlist is ", selectedOption)
         console.log("Fetch nextpage method is call");
-        if (selectedOption == '4' || searchtext=='') {
+        if (selectedOption == '4' || searchtext == '') {
             let statementRef = firestore()
                 .collection('statement')
                 .orderBy('sauda_no', 'desc')
@@ -92,41 +92,67 @@ export default StatementScreen = ({ navigation }) => {
         // setSelectedOption('4')
         setReachedEnd(false);
         console.log("i call fetchstatement first time method ");
-        const statementRef = firestore()
-            .collection('statement')
-            .orderBy('date', 'desc')
-            // .orderBy('sauda_no', 'desc')
-            
+        const statementRef = firestore().collection('statement');
+
         const unsubscribe = statementRef.onSnapshot((querySnapshot) => {
-            const newStatementData = querySnapshot.docs.map((doc) => doc.data());
-            // console.log("new statement is added to statement data ", newStatementData);
-            setstatementdata(newStatementData);
-            // console.log('Statement contains --> ', statementdata);
+          if (!querySnapshot.empty) {
+            const unsortedData = querySnapshot.docs.map((doc) => ({
+              id: doc.id,
+              ...doc.data(),
+            }));
+        
+            // Sort by date in descending order
+            const sortedData = unsortedData.sort((a, b) => {
+              const dateA =moment(a.date).format('DD/MM/YYYY');
+              const dateB = moment(b.date).format('DD/MM/YYYY');
+            //   new Date(b.date);
+                console.log("MY date A value contans ",dateA);
+                console.log("My date B value contioaons ",dateB);
+              // Compare dates
+              if (dateA > dateB)
+              {
+                console.log("does A date is greater than b ")
+              return -1;
+              }
 
-            if (querySnapshot.docs.length > 0) {
-                // console.log("Does my query snapshot length >0 ");
-                // console.log("Query snapshot value contains ", querySnapshot.docs);
-                const newLastDocument = querySnapshot.docs[querySnapshot.docs.length - 1];
-                setLastDocument(newLastDocument);
-            }
-            if (querySnapshot.docs.length === 0) {
-                // setReachedEnd(true); // No more data to fetch
-            }
+              if (dateA < dateB) 
+              {
+                console.log("Does B date is greater than A");
+                return 1;}
+        
+          return b.sauda_no-a.sauda_no;
+            });
+        
+            setstatementdata(sortedData);
+            // for(let i of sortedData)
+            // {
+            //     const mydate=new Date(i.date);
+            //     const newdate=moment(i.date.valueOf());
+            //     console.log("New date value contains ",newdate);
+            //     console.log("MY date vaule is the --->>", mydate);
+            // }
+            const newLastDocument = querySnapshot.docs[querySnapshot.docs.length - 1];
+            setLastDocument(newLastDocument);
+          } else {
+            // Handle the case where there are no documents
+            console.log("No documents found.");
+          }
         });
-
+        
         return () => unsubscribe();
+        
+
     }
     useEffect(() => {
         fetchstatementfirsttime();
     }, []);
 
-useEffect(()=>{
-if(searchtext=='' )
-{
-    setLastDocument('');
-    fetchstatementfirsttime();
-}
-},[searchtext])
+    useEffect(() => {
+        if (searchtext == '') {
+            setLastDocument('');
+            fetchstatementfirsttime();
+        }
+    }, [searchtext])
     async function fetchStatementbyName(searchtext) {
         setLastDocument('');
         console.log("Querying for ", searchtext);
@@ -160,9 +186,8 @@ if(searchtext=='' )
                 console.log("Seller Data contains ", sellerData);
                 const combineData = [...buyerData, ...sellerData].sort((a, b) => a.sauda_no - b.sauda_no);
                 setstatementdata(combineData);
-                if(combineData.length>0)
-                {
-                setReachedEnd(true);
+                if (combineData.length > 0) {
+                    setReachedEnd(true);
                 }
                 // Rest of your code to process the snapshots
             } catch (error) {
@@ -200,9 +225,8 @@ if(searchtext=='' )
                 const saudaData = numberSnapshot.docs.map((doc) => doc.data());
                 console.log("sauda data contains wher match is ", saudaData);
                 setstatementdata(saudaData);
-                if(saudaData>0)
-                {
-                setReachedEnd(true);
+                if (saudaData > 0) {
+                    setReachedEnd(true);
                 }
             }
             catch (error) {
@@ -212,7 +236,7 @@ if(searchtext=='' )
     }
     async function fetchStatementbyCity(searchtext) {
 
-        console.log("search city name is ",searchtext);
+        console.log("search city name is ", searchtext);
         setLastDocument('');
         console.log("Querying for ", searchtext);
         if (!searchtext.trim()) {
@@ -229,7 +253,7 @@ if(searchtext=='' )
                     .get();
                 const sellercitysnapshot = await statementCollection
                     .where('SellerData.city', '>=', searchtext)
-                    .where('SellerData.city', '<=', searchtext  + '\uf8ff')
+                    .where('SellerData.city', '<=', searchtext + '\uf8ff')
                     .get();
 
                 const buyerData = buyercitysnapshot.docs.map((doc) => doc.data());
@@ -241,8 +265,7 @@ if(searchtext=='' )
                 console.log("Number of Unique Documents:", uniqueData.length);
                 const sortedData = uniqueData.sort((a, b) => a.sauda_no - b.sauda_no);
 
-                if(sortedData>0)
-                {
+                if (sortedData > 0) {
                     setReachedEnd(true);
                 }
                 setstatementdata(sortedData);
@@ -259,19 +282,19 @@ if(searchtext=='' )
         }
     }
     function removeDuplicateSaudaNos(data) {
-        console.log("remove duplicate sauda method calls  ",data);
+        console.log("remove duplicate sauda method calls  ", data);
         const uniqueData = [];
         const seenSaudaNos = new Set();
-    
+
         data.forEach((item) => {
             const saudaNo = item.sauda_no;
-    
+
             if (!seenSaudaNos.has(saudaNo)) {
                 uniqueData.push(item);
                 seenSaudaNos.add(saudaNo);
             }
         });
-    
+
         return uniqueData;
     }
     async function fetchStatementbyDate() {
@@ -307,7 +330,7 @@ if(searchtext=='' )
         }
     }
     useEffect(() => {
-        console.log("Statement data value in useEffect ", statementdata);
+        // console.log("Statement data value in useEffect ", statementdata);
 
     }, [statementdata])
 
@@ -390,7 +413,7 @@ if(searchtext=='' )
         setReachedEnd(false);
         console.log("on change text value method call ", text);
         setsearchtext(text);
-        
+
         if (selectedOption == '0') {
             // search by date
             // fetchStatementbyDate();
@@ -457,17 +480,17 @@ if(searchtext=='' )
         []
     );
 
-useEffect(()=>{
-    console.log("My reach end value is ",reachedEnd);
-},[reachedEnd])
+    useEffect(() => {
+        console.log("My reach end value is ", reachedEnd);
+    }, [reachedEnd])
     const handleOptionSelect = (option) => {
         setSelectedOption(option);
     };
 
-const handleprint=()=>{
-    console.log("Print the report ");
-    statementandsharepdf(statementdata,searchtext);
-}
+    const handleprint = () => {
+        console.log("Print the report ");
+        statementandsharepdf(statementdata, searchtext);
+    }
 
     // for date modal
     const [mySelectedStartDate, setSelectedStartDate] = useState(moment(new Date()).format('DD/MM/YYYY'));
@@ -565,7 +588,7 @@ const handleprint=()=>{
             <ScrollView style={styles.scrollcontainer}
                 horizontal
             >
-                <View style={{ flexDirection: 'column',}}>
+                <View style={{ flexDirection: 'column', }}>
                     <View style={{ flexDirection: 'row', marginBottom: moderateScale(20) }}>
                         <View style={styles.number_container}>
                             <Text style={[styles.headertext, { marginHorizontal: 0 }]}>No</Text>
@@ -597,24 +620,25 @@ const handleprint=()=>{
                         </View> */}
                     </View>
                     {statementdata.length > 0 ? (
-                    <FlatList
-                        // onEndReached={fetchNextPage}
-                        // onEndReachedThreshold={0.7}
-                        data={statementdata}
-                        keyExtractor={(item, index) => index.toString()}
-                        renderItem={({ item }) => <DataRow data={item}
+                        <FlatList
+                            // onEndReached={fetchNextPage}
+                            // onEndReachedThreshold={0.7}
+                            data={statementdata}
+                            keyExtractor={(item, index) => index.toString()}
+                            renderItem={({ item }) => <DataRow data={item}
+                            />
+                            }
+                            onRefresh={onRefresh}
+                            refreshing={refreshing}
                         />
-                        }
-                        onRefresh={onRefresh}
-                        refreshing={refreshing}
-                    />
-                    ):
-                    (
-                        <Text style={{  fontSize: 16,
-                            color: 'gray',
+                    ) :
+                        (
+                            <Text style={{
+                                fontSize: 16,
+                                color: 'gray',
                             }}>No Data Available</Text>
-                    )
-                        }
+                        )
+                    }
                     {/* <BottomSheet ref={filterBottomSheetRef} index={1} snapPoints={['1%', '40%']}>
                             <View style={{
                                 flex: 1,
@@ -629,16 +653,16 @@ const handleprint=()=>{
                 
             </View> */}
             </ScrollView>
-             <View style={{ alignItems: 'center' ,flexDirection:'row',justifyContent:'space-around'}}>
+            <View style={{ alignItems: 'center', flexDirection: 'row', justifyContent: 'space-around' }}>
                 {/* Your data rendering logic here */}
                 {reachedEnd && <Text style={{ color: 'black', }}>Reach End of the Data</Text>}
-                { reachedEnd && <TouchableOpacity onPress={handleprint} activeOpacity={0.4}
+                {reachedEnd && <TouchableOpacity onPress={handleprint} activeOpacity={0.4}
                     style={styles.printpdf}
                 >
                     <Text>Print the Sauda</Text>
-                    </TouchableOpacity>}
+                </TouchableOpacity>}
             </View>
-           
+
 
             {/* Filter Modal */}
             <BottomSheetModal

@@ -133,13 +133,13 @@ const generateHTML = (formData) => {
 };
 
 
-const createPDF = async () => {
+const createPDF = async (formState) => {
   // console.log("My fomr state values in the createpdf function is ",formState);
-  const formState= {
-    "BuyerData": {"address": "Talod", "brokerage": 3, "city": "Talod", "companyname": "Shubham Enterprise ", "customid": "1698927970008141", "gst": "", "mobile": "", "name": "Shubham"}, 
-    "SellerData": {"address": "52 ,Market Yard", "brokerage": 2.5, "city": "Talod", "companyname": "Rakeshkumar B Shah", "customid": "1699006725556470", "gst": "", "mobile": "464649", "name": "Rakeshkumar Shah"},
-     "date": "2023-11-08T20:40:00+05:30", 
-     "dynamicFields": [{"Bags": "220", "Bardan": "Sabardan", "Item": "CottonCake", "Notes": "", "Payment": "Left", "Rate": "2260", "Weight": "50", "buyerbrokerage": 660, "quantity": 11000, "sauda_no": 9, "sellerbrokerage": 550, "unique_id": "1699456201045575"}, {"Bags": "455", "Bardan": "Sabardan", "Item": "CottonCake", "Notes": "", "Payment": "Done", "Rate": "1797", "Weight": "38", "buyerbrokerage": 1365, "quantity": 17290, "sauda_no": 10, "sellerbrokerage": 1137.5, "unique_id": "169945620324758"}]}
+  // const formState= {
+  //   "BuyerData": {"address": "Talod", "brokerage": 3, "city": "Talod", "companyname": "Shubham Enterprise ", "customid": "1698927970008141", "gst": "", "mobile": "", "name": "Shubham"}, 
+  //   "SellerData": {"address": "52 ,Market Yard", "brokerage": 2.5, "city": "Talod", "companyname": "Rakeshkumar B Shah", "customid": "1699006725556470", "gst": "", "mobile": "464649", "name": "Rakeshkumar Shah"},
+  //    "date": "2023-11-08T20:40:00+05:30", 
+  //    "dynamicFields": [{"Bags": "220", "Bardan": "Sabardan", "Item": "CottonCake", "Notes": "", "Payment": "Left", "Rate": "2260", "Weight": "50", "buyerbrokerage": 660, "quantity": 11000, "sauda_no": 9, "sellerbrokerage": 550, "unique_id": "1699456201045575"}, {"Bags": "455", "Bardan": "Sabardan", "Item": "CottonCake", "Notes": "", "Payment": "Done", "Rate": "1797", "Weight": "38", "buyerbrokerage": 1365, "quantity": 17290, "sauda_no": 10, "sellerbrokerage": 1137.5, "unique_id": "169945620324758"}]}
   const htmlContent = generateHTML(formState);
   const ab = parseFloat(Math.random() * 10000).toFixed(0);
     const FileName = `SanmatiBrokers${ab}.pdf`;

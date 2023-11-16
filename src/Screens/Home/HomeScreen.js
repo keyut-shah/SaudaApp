@@ -20,6 +20,7 @@ import { Platform, PermissionsAndroid, } from "react-native";
 import RNHTMLtoPDF from 'react-native-html-to-pdf';
 import RNFS from 'react-native-fs';
 import createPDF from '../../common/CreateAndSavePDF';
+import ShareSaudaText from '../../common/SaudaText';
 
 export default HomeScreen = ({ navigation }) => {
   const [SellerName, onChangeSellerName] = useState('');
@@ -37,6 +38,10 @@ export default HomeScreen = ({ navigation }) => {
   const generatepdf=()=>{
     saveDataToFirestore();
     createPDF(formState);
+  }
+  const generatetext=()=>{
+    ShareSaudaText(formState);
+    console.log("Generate Text to sent the details ");
   }
   const showDatePicker = () => {
     setDatePickerVisibility(true);
@@ -339,7 +344,7 @@ export default HomeScreen = ({ navigation }) => {
       Payment: '',
       Notes: '',
       sauda_no: '',
-      unique_id: '',
+      unique_id: generateUniqueId(),
       quantity: 0,
       sellerbrokerage: 0,
       buyerbrokerage: 0,
@@ -477,7 +482,7 @@ export default HomeScreen = ({ navigation }) => {
         Payment: '',
         Notes: '',
         sauda_no: uniquenumber,
-        unique_id: '',
+        unique_id: generateUniqueId(),
         quantity: '',
         sellerbrokerage: '',
         buyerbrokerage: '',
@@ -491,8 +496,8 @@ export default HomeScreen = ({ navigation }) => {
     const { BuyerData, SellerData, date, dynamicFields } = formState;
     console.log("usr click on save button now lets check some props");
     console.log("Data i have to save is ", dataToSave);
-    console.log("buyerdata ->", BuyerData);
-    console.log("SellerData -->", SellerData);
+    // console.log("buyerdata ->", BuyerData);
+    // console.log("SellerData -->", SellerData);
     console.log("date-->", date);
     console.log('dynamic fields ', dynamicFields);
     if (query.trim() === '' || buyerquery.trim() == '') {
@@ -512,19 +517,20 @@ export default HomeScreen = ({ navigation }) => {
 
     const batch = firestore().batch(); // Create a single batch for all the writes
 
-    dynamicFields.forEach(async (fieldSet) => {
+   dynamicFields.forEach(async (fieldSet) => {
       const uniqueid = fieldSet?.unique_id;
       console.log("Fieldset value contains ", fieldSet);
       console.log("Unique id contains ====>>>", uniqueid);
-      const dataToSave = {
+      const dataToSave2 = {
         BuyerData,
         SellerData,
         date,
         ...fieldSet,
       };
-
+      console.log("Data to save 2 value contains ",dataToSave2);
+      
       const newDocumentRef = statementListRef.doc(uniqueid);
-      batch.set(newDocumentRef, dataToSave);
+      batch.set(newDocumentRef, dataToSave2);
     });
 
     try {
@@ -545,6 +551,9 @@ export default HomeScreen = ({ navigation }) => {
   useEffect(() => {
     console.log(" sauda no ", lastsaudano)
   }, [lastsaudano])
+  useEffect(()=>{
+    console.log("My unique id changes  -->>",formState.dynamicFields[0].unique_id);
+  },[formState.dynamicFields[0].unique_id])
   useEffect(() => {
     console.log("Form State value contains ==>>>>", formState)
   }, [formState])
@@ -660,7 +669,7 @@ export default HomeScreen = ({ navigation }) => {
             <View style={styles.sty9}>
 
               <Autocomplete
-                style={{ color: 'black' }}
+                style={{ color: 'black' ,height:moderateScale(45)}}
                 ref={autocompletesellerRef}
                 // renderTextInput={(props) => <CustomTextInput {...props} />}
                 hideResults={hidingsellerdropdown}
@@ -724,7 +733,7 @@ export default HomeScreen = ({ navigation }) => {
             <View style={styles.sty9}>
 
               <Autocomplete
-                style={{ color: 'black' }}
+                style={{ color: 'black',height:moderateScale(45) }}
                 hideResults={hidingbuyerdropdown}
                 ref={autocompletebuyerRef}
 
@@ -896,7 +905,7 @@ export default HomeScreen = ({ navigation }) => {
               </View>
             </View>
           ))}
-
+    <View style={{flexDirection:'row',borderWidth:1,justifyContent:'space-between',marginHorizontal:10}}>
           <View style={styles.bottomview}>
             <TouchableOpacity style={styles.SaveContainer}
               onPress={saveDataToFirestore}
@@ -909,11 +918,19 @@ export default HomeScreen = ({ navigation }) => {
             <TouchableOpacity style={styles.SaveContainer}
               onPress={generatepdf}
             >
-              <Text style={styles.SaveText}>Save and Share</Text>
+              <Text style={styles.SaveText}>Save and Share as Pdf</Text>
 
             </TouchableOpacity>
           </View>
+          <View style={styles.bottomview}>
+            <TouchableOpacity style={styles.SaveContainer}
+              onPress={generatetext}
+            >
+              <Text style={styles.SaveText}>Save and Share as Text</Text>
 
+            </TouchableOpacity>
+          </View>
+          </View>
         </ScrollView>
 
       </LinearGradient>

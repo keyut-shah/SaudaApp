@@ -7,9 +7,21 @@ import NewBardanScreen from '../Bardan/NewBardanScreen';
 import ItemTypeScreen from '../ItemType/ItemTypeScreen';
 import styles from './WorkStyle';
 import DynamicForm from '../NewDemoScreen';
+import PhoneSignIn from '../Authentication/AuthenticationScreen';
+import auth from '@react-native-firebase/auth';
+import LogOutConfirmationModal from '../../common/LogOutModal';
 export default WorkScreen = ({ navigation }) => {
-
-
+    const handleLogout = async () => {
+        try {
+            await auth().signOut();
+            // You can navigate to the authentication flow after logout
+            navigation.replace('PhoneSignIn');
+        } catch (error) {
+            console.log("Some error occur while sigout ", error);
+            //   console.error('Error logging out:', error.message);
+        }
+    }
+    const [isModalVisible, setIsModalVisible] = useState(false);
     return (
         <View style={styles.contianer}>
             <TouchableOpacity style={styles.datacontainer}
@@ -30,12 +42,17 @@ export default WorkScreen = ({ navigation }) => {
             >
                 <Text style={styles.datatext}>Create Item Bardan</Text>
             </TouchableOpacity>
-            {/* <TouchableOpacity style={styles.datacontainer}
+            <TouchableOpacity style={styles.datacontainer}
                 activeOpacity={0.5}
-                onPress={() => navigation.navigate('DynamicForm')}
+                onPress={() => setIsModalVisible(true)}
             >
-                <Text style={styles.datatext}>Create Item Bardan</Text>
-            </TouchableOpacity> */}
+                <Text style={styles.datatext}>LogOut</Text>
+            </TouchableOpacity>
+            <LogOutConfirmationModal
+                isVisible={isModalVisible}
+                onClose={() => setIsModalVisible(false)}
+                onDelete={handleLogout}
+            />
         </View>
     )
 }

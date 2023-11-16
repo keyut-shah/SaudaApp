@@ -76,7 +76,7 @@ export default UpdateScreen = ({ route, navigation }) => {
     const [buyertotalbrokerage, setbuyertotalbrokerage] = useState(statementdata?.buyerbrokerage);
 
     const [myquantity, setquanity] = useState(statementdata?.quantity);
-
+    const [isodate,setisodate]=useState(statementdata?.date);
     useEffect(() => {
         const myquantity = parseFloat(Weight) * parseFloat(Bags);
         console.log("My quantity value is ", myquantity);
@@ -129,12 +129,17 @@ export default UpdateScreen = ({ route, navigation }) => {
         console.log("A date has been picked: ", date);
         const formattedDate = moment(date).format('DD/MM/YYYY');
         setSelectedDate(formattedDate);
+        const formatdate=moment(new Date(date)).format();
+        setisodate(formatdate);
         hideDatePicker();
     };
 
     const updatedataandshare=()=>{
         console.log("We are on update and share method");
-        const convertdate = moment(mySelectedDate, "DD/MM/YYYY").format();
+        // const convertdate = moment(mySelectedDate, "DD/MM/YYYY").format();
+        // const convertdate = moment(mySelectedDate, "DD/MM/YYYY").add({ hours: new Date().getHours(), minutes: new Date().getMinutes(), seconds: new Date().getSeconds() }).format();
+
+
         const saudainfo = {
             Bags: Bags,
             Bardan: selectedBardan,
@@ -146,7 +151,7 @@ export default UpdateScreen = ({ route, navigation }) => {
             SellerData: selectedSellerData,
             Weight: Weight,
             buyerbrokerage: parseInt(buyertotalbrokerage),
-            date: convertdate,
+            date: isodate,
             quantity: parseInt(myquantity),
             sauda_no: parseInt(Sauda),
             sellerbrokerage: parseInt(sellertotalbrokerage),
@@ -155,6 +160,7 @@ export default UpdateScreen = ({ route, navigation }) => {
 
         }
         console.log("My sauda info contains in update screen is ",saudainfo);
+        addDataansShareData();
         updateandsharepdf(saudainfo);
     }
     const addDataansShareData = () => {
@@ -178,8 +184,9 @@ export default UpdateScreen = ({ route, navigation }) => {
         const customId = customid;
         const saudano = parseInt(Sauda);
         console.log("SELECTED DATE ==>", mySelectedDate);
-        const convertdate = moment(mySelectedDate, "DD/MM/YYYY").format();
-        console.log("converted date contains", convertdate);
+        // const convertdate = moment(mySelectedDate, "DD/MM/YYYY").format();
+        // const convertdate = moment(mySelectedDate, "DD/MM/YYYY").add({ hours: new Date().getHours(), minutes: new Date().getMinutes(), seconds: new Date().getSeconds() }).format();
+        // console.log("converted date contains", convertdate);
 
         const saudainfo = {
             Bags: Bags,
@@ -189,7 +196,7 @@ export default UpdateScreen = ({ route, navigation }) => {
             Rate: Rate,
             SellerData: selectedSellerData,
             Weight: Weight,
-            date: convertdate,
+            date: isodate,
             sauda_no: saudano,
             unique_id: customid,
 
@@ -211,7 +218,7 @@ export default UpdateScreen = ({ route, navigation }) => {
                 SellerData: selectedSellerData,
                 Weight: Weight,
                 buyerbrokerage: buyertotalbrokerage,
-                date: convertdate,
+                date: isodate,
                 quantity: myquantity,
                 sauda_no: saudano,
                 sellerbrokerage: sellertotalbrokerage,
@@ -789,16 +796,19 @@ export default UpdateScreen = ({ route, navigation }) => {
                                         style={styles.sty17}>{statementdata?.Payment}</Text>
                             }
                         </View>
-                        <View style={[styles.sty12,]}>
+                        <View style={[styles.sty12,{}]}>
                             <Text style={styles.sty5}>Note </Text>
 
-                            <Text style={[styles.sty5, { marginLeft: 1 }]}>:</Text>
+                            <Text 
+                            ellipsizeMode='tail'
+                            style={[styles.sty5, {  }]}>:</Text>
                             {
                                 ScreenEditable == false &&
-                                <View style={{}}>
+                                <View style={{overflow:'hidden',paddingRight:moderateScale(15)}}>
                                     <Text
+
                                         ellipsizeMode='tail'
-                                        style={styles.sty17}>{statementdata?.Notes}</Text>
+                                        style={[styles.sty17,{}]}>{statementdata?.Notes}</Text>
                                 </View>
                             }
                         </View>
