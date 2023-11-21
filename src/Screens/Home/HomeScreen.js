@@ -40,6 +40,7 @@ export default HomeScreen = ({ navigation }) => {
     createPDF(formState);
   }
   const generatetext=()=>{
+    saveDataToFirestore();
     ShareSaudaText(formState);
     console.log("Generate Text to sent the details ");
   }
@@ -905,8 +906,8 @@ export default HomeScreen = ({ navigation }) => {
               </View>
             </View>
           ))}
-    <View style={{flexDirection:'row',borderWidth:1,justifyContent:'space-between',marginHorizontal:10}}>
-          <View style={styles.bottomview}>
+    <View style={{flexDirection:'row',}}>
+          <View style={[styles.bottomview,{flex:1}]}>
             <TouchableOpacity style={styles.SaveContainer}
               onPress={saveDataToFirestore}
             >
@@ -914,15 +915,15 @@ export default HomeScreen = ({ navigation }) => {
 
             </TouchableOpacity>
           </View>
-          <View style={styles.bottomview}>
+          {/* <View style={styles.bottomview}>
             <TouchableOpacity style={styles.SaveContainer}
               onPress={generatepdf}
             >
               <Text style={styles.SaveText}>Save and Share as Pdf</Text>
 
             </TouchableOpacity>
-          </View>
-          <View style={styles.bottomview}>
+          </View> */}
+          <View style={[styles.bottomview,{flex:2,}]}>
             <TouchableOpacity style={styles.SaveContainer}
               onPress={generatetext}
             >

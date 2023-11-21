@@ -33,13 +33,13 @@ const styles = StyleSheet.create({
   modalContent: {
     backgroundColor: 'white',
     padding: moderateScale(20),
-    borderRadius: 10,
-    width: 300,
-    elevation: 5,
+    borderRadius: moderateScale(10),
+    width: moderateScale(300),
+    elevation: moderateScale(5),
   },
   modalText: {
-    fontSize: 16,
-    marginBottom: 10,
+    fontSize: moderateScale(16),
+    marginBottom: moderateScale(10),
     color:"black"
   },
   buttonContainer: {
@@ -48,11 +48,11 @@ const styles = StyleSheet.create({
   },
   deleteButton: {
     color: 'red',
-    fontSize: 18,
+    fontSize: moderateScale(18),
   },
   noButton: {
     color: 'blue',
-    fontSize: 18,
+    fontSize: moderateScale(18),
   },
 });
 

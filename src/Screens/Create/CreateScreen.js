@@ -137,7 +137,7 @@ function CreateScreen({ navigation }) {
         // setLoading(true);
         const customID = generateUniqueId();
         const usersCollection = firestore().collection('users').doc(customID);
-        if (PartyName.trim() === '') {
+        if(PartyName==null || PartyName.trim()=='' || PartyName==undefined){
             Snackbar.show({
                 text: 'Please write Company Name',
                 duration: Snackbar.LENGTH_SHORT,
@@ -187,6 +187,16 @@ function CreateScreen({ navigation }) {
 
     const updateDataToFirestore = async () => {
         console.log("Here trying to update data of my Trader");
+        if(PartyName==null || PartyName.trim()=='' || PartyName==undefined)
+        {
+            Snackbar.show({
+                text: 'Please write part name',
+                duration: Snackbar.LENGTH_SHORT,
+                backgroundColor: 'red',
+                textColor: 'white',
+            });
+            return;
+        }
         let updatetraderdata = {
             address: address,
             city: city,

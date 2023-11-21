@@ -634,7 +634,7 @@ export default StatementScreen = ({ navigation }) => {
                     ) :
                         (
                             <Text style={{
-                                fontSize: 16,
+                                fontSize:  moderateScale(16),
                                 color: 'gray',
                             }}>No Data Available</Text>
                         )

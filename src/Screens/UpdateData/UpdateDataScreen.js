@@ -16,6 +16,7 @@ import DeleteConfirmationModal from '../../common/DeleteModal';
 import { Dropdown } from 'react-native-element-dropdown';
 import ItemDropdownComponent from '../../common/ItemDropDown';
 import updateandsharepdf from '../../common/UpdateAndSavePDF';
+import ShareSaudaText from '../../common/SaudaText';
 export default UpdateScreen = ({ route, navigation }) => {
     const { statementdata } = route.params;
     const [saudadetail, setsaudadetail] = useState(statementdata);
@@ -76,7 +77,9 @@ export default UpdateScreen = ({ route, navigation }) => {
     const [buyertotalbrokerage, setbuyertotalbrokerage] = useState(statementdata?.buyerbrokerage);
 
     const [myquantity, setquanity] = useState(statementdata?.quantity);
-    const [isodate,setisodate]=useState(statementdata?.date);
+    const [isodate, setisodate] = useState(statementdata?.date);
+
+
     useEffect(() => {
         const myquantity = parseFloat(Weight) * parseFloat(Bags);
         console.log("My quantity value is ", myquantity);
@@ -129,12 +132,12 @@ export default UpdateScreen = ({ route, navigation }) => {
         console.log("A date has been picked: ", date);
         const formattedDate = moment(date).format('DD/MM/YYYY');
         setSelectedDate(formattedDate);
-        const formatdate=moment(new Date(date)).format();
+        const formatdate = moment(new Date(date)).format();
         setisodate(formatdate);
         hideDatePicker();
     };
 
-    const updatedataandshare=()=>{
+    const updatedataandshare = () => {
         console.log("We are on update and share method");
         // const convertdate = moment(mySelectedDate, "DD/MM/YYYY").format();
         // const convertdate = moment(mySelectedDate, "DD/MM/YYYY").add({ hours: new Date().getHours(), minutes: new Date().getMinutes(), seconds: new Date().getSeconds() }).format();
@@ -159,7 +162,7 @@ export default UpdateScreen = ({ route, navigation }) => {
 
 
         }
-        console.log("My sauda info contains in update screen is ",saudainfo);
+        console.log("My sauda info contains in update screen is ", saudainfo);
         addDataansShareData();
         updateandsharepdf(saudainfo);
     }
@@ -274,6 +277,35 @@ export default UpdateScreen = ({ route, navigation }) => {
 
         setData(users);
     };
+
+    const generatetext = () => {
+        const saudano = parseInt(Sauda);
+
+        const saudainfo = {
+            date: isodate,
+            BuyerData: selectedBuyerData,
+            SellerData: selectedSellerData,
+            dynamicFields:[ {
+                Bags: Bags,
+                Bardan: selectedBardan,
+                Item: selectItemType,
+                Notes: Notes,
+                Payment: Payment,
+                Rate: Rate,
+                Weight: Weight,
+                buyerbrokerage: buyertotalbrokerage,
+                quantity: myquantity,
+                sauda_no: saudano,
+                sellerbrokerage: sellertotalbrokerage,
+                unique_id: customid,
+            }
+        ]
+
+        }
+        addDataansShareData();
+        ShareSaudaText(saudainfo);
+
+    }
     const handleInputChange = (text) => {
         sethidingsellerdropdown(false);
         // console.log("text contians in textinput is --> ", text);
@@ -796,19 +828,19 @@ export default UpdateScreen = ({ route, navigation }) => {
                                         style={styles.sty17}>{statementdata?.Payment}</Text>
                             }
                         </View>
-                        <View style={[styles.sty12,{}]}>
+                        <View style={[styles.sty12, {}]}>
                             <Text style={styles.sty5}>Note </Text>
 
-                            <Text 
-                            ellipsizeMode='tail'
-                            style={[styles.sty5, {  }]}>:</Text>
+                            <Text
+                                ellipsizeMode='tail'
+                                style={[styles.sty5, {}]}>:</Text>
                             {
                                 ScreenEditable == false &&
-                                <View style={{overflow:'hidden',paddingRight:moderateScale(15)}}>
+                                <View style={{ overflow: 'hidden', paddingRight: moderateScale(15) }}>
                                     <Text
 
                                         ellipsizeMode='tail'
-                                        style={[styles.sty17,{}]}>{statementdata?.Notes}</Text>
+                                        style={[styles.sty17, {}]}>{statementdata?.Notes}</Text>
                                 </View>
                             }
                         </View>
@@ -842,10 +874,16 @@ export default UpdateScreen = ({ route, navigation }) => {
                                         <Text style={styles.SaveText}>Update</Text>
 
                                     </TouchableOpacity>
-                                    <TouchableOpacity style={styles.SaveContainer}
+                                    {/* <TouchableOpacity style={styles.SaveContainer}
                                         onPress={updatedataandshare}
                                     >
                                         <Text style={styles.SaveText}>Update and Share </Text>
+
+                                    </TouchableOpacity> */}
+                                    <TouchableOpacity style={styles.SaveContainer}
+                                        onPress={generatetext}
+                                    >
+                                        <Text style={styles.SaveText}>Share Text Only </Text>
 
                                     </TouchableOpacity>
                                 </View>

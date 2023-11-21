@@ -22,7 +22,7 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
 import firestore from '@react-native-firebase/firestore';
-
+import { moderateScale } from 'react-native-size-matters';
 const DropdownComponent = ({ value, onChange }) => {
 
   // console.log("My value contains -->", value);
@@ -110,22 +110,22 @@ export default DropdownComponent;
 
 const styles = StyleSheet.create({
   dropdown: {
-    marginHorizontal: 16,
-    height: 50,
+    marginHorizontal: moderateScale(16),
+    height: moderateScale(50),
     borderBottomColor: 'gray',
     borderBottomWidth: 0.5,
     borderWidth: 1,
-    width: 170,
+    width: moderateScale(170),
   },
   icon: {
-    marginRight: 5,
+    marginRight: moderateScale(5),
   },
   placeholderStyle: {
-    fontSize: 16,
+    fontSize: moderateScale(16),
     color: 'black'
   },
   selectedTextStyle: {
-    fontSize: 16,
+    fontSize: moderateScale(16),
     color: 'black'
   },
 
