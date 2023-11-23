@@ -633,6 +633,7 @@ export default HomeScreen = ({ navigation }) => {
 
         <View style={{ justifyContent: 'center', alignItems: 'center' }}>
           <Text style={styles.sty2}>Sanmati/Navkar Brokers </Text>
+          <Text style={styles.addresssubtext}>119 Market Yard ,Talod-383215 </Text>
         </View>
         <View style={[styles.sty3, { paddingVertical: moderateScale(10), flexDirection: 'row', alignItems: 'center' }]}>
 

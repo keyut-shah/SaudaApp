@@ -5,9 +5,10 @@ import { } from 'react-native';
 
 const ShareSaudaText = (formData) => {
   console.log("My fomrm Data value contains in the text format method is  ", formData);
-  const recipientNumber = `+91${formData.SellerData?.mobile || formData.BuyerData?.mobile}`;
-  console.log("seller number ", recipientNumber);
-  if (!recipientNumber) {
+  const sellerNumber = `+91${formData.SellerData?.mobile || formData.BuyerData?.mobile}`;
+  const buyernumber = `+91${formData.BuyerData?.mobile}`
+  console.log("seller number ", sellerNumber);
+  if (!sellerNumber || !buyernumber) {
     console.error("No valid mobile number found.");
 
     return;
@@ -44,10 +45,12 @@ const ShareSaudaText = (formData) => {
   ${formattedDynamicFields}`;
 
   console.log("My message contians before the sending is ", message);
-  console.log("My seller number contains ", recipientNumber);
+  console.log("My seller number contains ", sellerNumber);
 
   try {
-    Linking.openURL(`whatsapp://send?text=${encodeURIComponent(message)}&phone=${recipientNumber}`);
+    Linking.openURL(`whatsapp://send?text=${encodeURIComponent(message)}&phone=${sellerNumber}`);
+    // Linking.openURL(`whatsapp://send?text=${encodeURIComponent(message)}&phone=${buyernumber}`);
+
   }
   catch (error) {
     console.log("Error while seding the data ", error);

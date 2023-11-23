@@ -95,52 +95,51 @@ export default StatementScreen = ({ navigation }) => {
         const statementRef = firestore().collection('statement');
 
         const unsubscribe = statementRef.onSnapshot((querySnapshot) => {
-          if (!querySnapshot.empty) {
-            const unsortedData = querySnapshot.docs.map((doc) => ({
-              id: doc.id,
-              ...doc.data(),
-            }));
-        
-            // Sort by date in descending order
-            const sortedData = unsortedData.sort((a, b) => {
-              const dateA =moment(a.date).format('DD/MM/YYYY');
-              const dateB = moment(b.date).format('DD/MM/YYYY');
-            //   new Date(b.date);
-                console.log("MY date A value contans ",dateA);
-                console.log("My date B value contioaons ",dateB);
-              // Compare dates
-              if (dateA > dateB)
-              {
-                console.log("does A date is greater than b ")
-              return -1;
-              }
+            if (!querySnapshot.empty) {
+                const unsortedData = querySnapshot.docs.map((doc) => ({
+                    id: doc.id,
+                    ...doc.data(),
+                }));
 
-              if (dateA < dateB) 
-              {
-                console.log("Does B date is greater than A");
-                return 1;}
-        
-          return b.sauda_no-a.sauda_no;
-            });
-        
-            setstatementdata(sortedData);
-            // for(let i of sortedData)
-            // {
-            //     const mydate=new Date(i.date);
-            //     const newdate=moment(i.date.valueOf());
-            //     console.log("New date value contains ",newdate);
-            //     console.log("MY date vaule is the --->>", mydate);
-            // }
-            const newLastDocument = querySnapshot.docs[querySnapshot.docs.length - 1];
-            setLastDocument(newLastDocument);
-          } else {
-            // Handle the case where there are no documents
-            console.log("No documents found.");
-          }
+                // Sort by date in descending order
+                const sortedData = unsortedData.sort((a, b) => {
+                    const dateA = moment(a.date).format('DD/MM/YYYY');
+                    const dateB = moment(b.date).format('DD/MM/YYYY');
+                    //   new Date(b.date);
+                    console.log("MY date A value contans ", dateA);
+                    console.log("My date B value contioaons ", dateB);
+                    // Compare dates
+                    if (dateA > dateB) {
+                        console.log("does A date is greater than b ")
+                        return -1;
+                    }
+
+                    if (dateA < dateB) {
+                        console.log("Does B date is greater than A");
+                        return 1;
+                    }
+
+                    return b.sauda_no - a.sauda_no;
+                });
+
+                setstatementdata(sortedData);
+                // for(let i of sortedData)
+                // {
+                //     const mydate=new Date(i.date);
+                //     const newdate=moment(i.date.valueOf());
+                //     console.log("New date value contains ",newdate);
+                //     console.log("MY date vaule is the --->>", mydate);
+                // }
+                const newLastDocument = querySnapshot.docs[querySnapshot.docs.length - 1];
+                setLastDocument(newLastDocument);
+            } else {
+                // Handle the case where there are no documents
+                console.log("No documents found.");
+            }
         });
-        
+
         return () => unsubscribe();
-        
+
 
     }
     useEffect(() => {
@@ -634,7 +633,7 @@ export default StatementScreen = ({ navigation }) => {
                     ) :
                         (
                             <Text style={{
-                                fontSize:  moderateScale(16),
+                                fontSize: moderateScale(16),
                                 color: 'gray',
                             }}>No Data Available</Text>
                         )

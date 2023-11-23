@@ -36,6 +36,7 @@ console.log("My user value contains ",user );
         <Stack.Navigator
             screenOptions={{headerShown:false}}
             initialRouteName={BottomTab}
+            
         >
         {user ? (
             <>

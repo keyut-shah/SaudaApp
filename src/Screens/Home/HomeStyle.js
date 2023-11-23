@@ -175,7 +175,14 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'flex-start'
     },
-
+addresssubtext:{
+    color: 'black',
+    fontStyle: 'normal',
+    fontSize: moderateScale(13),
+    // marginLeft: moderateScale(5),
+    fontWeight: '500',
+    marginTop: moderateScale(6)
+}
 })
 
 export default styles;

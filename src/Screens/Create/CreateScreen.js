@@ -251,42 +251,83 @@ function CreateScreen({ navigation }) {
     const deleteDataToFireStore = async () => {
         console.log("Here trying to delete data of the firestore ");
 
+        // firestore()
+        //     .collection('users')
+        //     .where('companyname', '==', selectedtradervalue?.companyname)
+        //     .doc(uniqueid)
+        //     .get()
+        //     .then((querySnapshot) => {
+        //         querySnapshot.forEach((doc) => {
+        //             doc.ref
+        //                 .delete()
+        //                 .then(() => {
+        //                     console.log('Document successfully deleted.');
+        //                     Snackbar.show({
+        //                         text: 'Document Deleted Successfully',
+        //                         duration: Snackbar.LENGTH_SHORT,
+        //                         backgroundColor: 'green',
+        //                         textColor: 'white',
+        //                     });
+        //                     clearstatedata();
+        //                 })
+        //                 .catch((error) => {
+        //                     console.log("errro while removing document is ", error);
+
+        //                     Snackbar.show({
+        //                         text: 'Error While removing Document please try again ',
+        //                         duration: Snackbar.LENGTH_SHORT,
+        //                         backgroundColor: 'red',
+        //                         textColor: 'white',
+        //                     });
+        //                 });
+        //         });
+        //     })
+        //     .catch((error) => {
+        //         console.error('Error getting documents: ', error);
+        //     });
+
         firestore()
-            .collection('users')
-            .where('companyname', '==', selectedtradervalue?.companyname)
-            .doc(uniqueid)
-            .get()
-            .then((querySnapshot) => {
-                querySnapshot.forEach((doc) => {
-                    doc.ref
-                        .delete()
-                        .then(() => {
-                            console.log('Document successfully deleted.');
-                            Snackbar.show({
-                                text: 'Document Deleted Successfully',
-                                duration: Snackbar.LENGTH_SHORT,
-                                backgroundColor: 'green',
-                                textColor: 'white',
-                            });
-                            clearstatedata();
-                        })
-                        .catch((error) => {
-                            console.log("errro while removing document is ", error);
-
-                            Snackbar.show({
-                                text: 'Error While removing Document please try again ',
-                                duration: Snackbar.LENGTH_SHORT,
-                                backgroundColor: 'red',
-                                textColor: 'white',
-                            });
-                        });
+        .collection('users')
+        .doc(selectedtradervalue?.customid) // Assuming customid is the document ID
+        .get()
+        .then((docSnapshot) => {
+          if (docSnapshot.exists) {
+            docSnapshot.ref
+              .delete()
+              .then(() => {
+                console.log('Document successfully deleted.');
+                Snackbar.show({
+                  text: 'Document Deleted Successfully',
+                  duration: Snackbar.LENGTH_SHORT,
+                  backgroundColor: 'green',
+                  textColor: 'white',
                 });
-            })
-            .catch((error) => {
-                console.error('Error getting documents: ', error);
+                clearstatedata();
+                setIsModalVisible(false);
+              })
+              .catch((error) => {
+                console.log('Error while removing document: ', error);
+                Snackbar.show({
+                  text: 'Error While removing Document, please try again ',
+                  duration: Snackbar.LENGTH_SHORT,
+                  backgroundColor: 'red',
+                  textColor: 'white',
+                });
+              });
+          } else {
+            console.log('Document not found');
+            Snackbar.show({
+              text: 'Document not found',
+              duration: Snackbar.LENGTH_SHORT,
+              backgroundColor: 'red',
+              textColor: 'white',
             });
-
-
+          }
+        })
+        .catch((error) => {
+          console.error('Error getting document: ', error);
+        });
+      
 
 
 
